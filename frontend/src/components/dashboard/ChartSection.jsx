@@ -87,42 +87,6 @@ function ChartSection({ trendData = [] }) {
         </div>
       </div>
 
-      {/* Perkembangan Burnout */}
-      <div className="bg-white rounded-2xl p-6 border-[0.67px] border-gray-100 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.10)]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-2">
-          <div>
-            <h3 className="text-lg font-semibold text-slate-800">Perkembangan Burnout</h3>
-            <p className="text-sm text-gray-500">Tren berdasarkan riwayat analisis</p>
-          </div>
-          {burnoutData.length > 0 && (
-            <div className={`border-[0.67px] rounded-full px-3 py-1.5 self-start sm:self-auto flex items-center gap-2 ${diff > 0 ? 'bg-red-50 border-red-100' : 'bg-green-50 border-green-100'}`}>
-               <div className={`w-3 h-3 rounded-full outline outline-1 ${diff > 0 ? 'bg-red-600 outline-red-300' : 'bg-green-600 outline-green-300'}`} />
-              <span className={`text-sm font-medium ${diff > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                {diff > 0 ? '+' : ''}{diffPct}%
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div className="h-56 w-full relative">
-          {trendData.length === 0 && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 backdrop-blur-[1.5px] z-10 text-center p-4">
-              <span className="text-sm font-semibold text-slate-500 italic">Menampilkan data simulasi</span>
-              <span className="text-xs text-slate-400">Silakan isi data asesmen harian Anda hari ini!</span>
-            </div>
-          )}
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={burnoutData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
-              <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-              <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} ticks={[0, 25, 50, 75, 100]} />
-              <Tooltip {...tooltipStyle} formatter={v => [`${v}%`, 'Burnout']} />
-              <Line type="monotone" dataKey="score" stroke="#8b5cf6" strokeWidth={3} dot={{ fill: '#8b5cf6', r: 5, strokeWidth: 0 }} activeDot={{ r: 7 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
     </div>
   )
 }

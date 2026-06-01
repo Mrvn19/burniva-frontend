@@ -14,7 +14,7 @@ function ReviewItem({ label, value }) {
   );
 }
 
-function ReviewStep({ formData }) {
+function ReviewStep({ formData, setFormData }) {
   // --- REVISI UTAMA: FUNGSI FORMATTER WAKTU (JAM & MENIT) ---
   
   // 1. Mengubah angka Desimal ke format "X jam Y menit" (Untuk Belajar & Tidur)
@@ -53,9 +53,49 @@ function ReviewStep({ formData }) {
     { label: 'Aktivitas Fisik',     value: formatMinutesToHoursMinutes(formData.activity_hours) },
   ];
 
+  // --- MOOD TRACKER DATA ---
+  const MOODS = [
+    { label: 'Senang', icon: '😊' },
+    { label: 'Tenang', icon: '😌' },
+    { label: 'Biasa', icon: '😐' },
+    { label: 'Sedih', icon: '😞' },
+    { label: 'Overwhelmed', icon: '😫' },
+  ];
+
   return (
-    <div className="flex flex-col gap-5 md:gap-7 w-full">
+    <div className="flex flex-col gap-6 md:gap-8 w-full">
       
+      {/* 🌟 MOOD TRACKER (PHASE 6) 🌟 */}
+      <div className="bg-primary-50 rounded-2xl p-5 border border-primary-100 flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <h3 className="text-base font-bold text-primary-700">Mood Hari Ini</h3>
+          <p className="text-xs md:text-sm text-primary-600/80">Bagaimana perasaanmu saat ini secara keseluruhan?</p>
+        </div>
+        <div className="grid grid-cols-5 gap-2 md:gap-4">
+          {MOODS.map(mood => {
+            const isSelected = formData.mood_today === mood.label;
+            return (
+              <button
+                key={mood.label}
+                onClick={() => setFormData({ ...formData, mood_today: mood.label })}
+                className={`flex flex-col items-center gap-2 p-2 md:p-3 rounded-xl border-2 transition-all ${
+                  isSelected 
+                    ? 'bg-white border-primary-500 shadow-md transform scale-105' 
+                    : 'bg-white/50 border-transparent hover:bg-white hover:border-primary-200'
+                }`}
+              >
+                <span className="text-2xl md:text-3xl">{mood.icon}</span>
+                <span className={`text-[10px] md:text-xs font-semibold ${isSelected ? 'text-primary-600' : 'text-slate-500'}`}>
+                  {mood.label}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      <div className="w-full h-px bg-slate-200"></div>
+
       {/* Header Step Tinjau */}
       <div className="flex flex-col gap-1 w-full">
         <h2 className="text-lg md:text-xl font-medium text-neutral-950 leading-7">

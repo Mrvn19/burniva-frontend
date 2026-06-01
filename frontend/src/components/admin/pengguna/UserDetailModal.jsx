@@ -2,42 +2,35 @@ import React from 'react'
 import { X, User, Mail, GraduationCap, Calendar, BarChart3, Moon, Activity, Trash2, Ban, Unlock } from 'lucide-react'
 
 const getRiskColor = (risk) => {
-    switch (risk) {
-        case 'Tinggi':
-            return {
-                text: 'text-red-600',
-                bg: 'bg-red-50',
-                border: 'border-red-100',
-                progress: 'bg-red-500'
-            };
-        case 'Sedang':
-            return {
-                text: 'text-amber-600',
-                bg: 'bg-amber-50',
-                border: 'border-amber-100',
-                progress: 'bg-amber-500'
-            };
-        case 'Rendah':
-            return {
-                text: 'text-emerald-600',
-                bg: 'bg-emerald-50',
-                border: 'border-emerald-100',
-                progress: 'bg-emerald-500'
-            };
-        default:
-            return {
-                text: 'text-slate-600',
-                bg: 'bg-slate-50',
-                border: 'border-slate-100',
-                progress: 'bg-slate-500'
-            };
+    const l = (risk || '').toLowerCase();
+    if (l === 'high' || l === 'tinggi') {
+        return { text: 'text-red-600', bg: 'bg-red-50', border: 'border-red-100', dot: 'bg-red-500' };
     }
+    if (l === 'medium' || l === 'sedang') {
+        return { text: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100', dot: 'bg-amber-500' };
+    }
+    if (l === 'low' || l === 'rendah') {
+        return { text: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', dot: 'bg-emerald-500' };
+    }
+    return { text: 'text-slate-600', bg: 'bg-slate-50', border: 'border-slate-100', dot: 'bg-slate-500' };
 }
 
-function UserDetailModal({ user, onClose, onToggleSuspend, onDelete }) {
+const getMentalHealthColor = (status) => {
+    const s = (status || '').toLowerCase();
+    if (s === 'baik') {
+        return { text: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', dot: 'bg-emerald-500' };
+    }
+    if (s === 'buruk') {
+        return { text: 'text-red-600', bg: 'bg-red-50', border: 'border-red-100', dot: 'bg-red-500' };
+    }
+    return { text: 'text-slate-600', bg: 'bg-slate-50', border: 'border-slate-100', dot: 'bg-slate-500' };
+}
+
+function UserDetailModal({ user, onClose, onToggleSuspend, onDelete, onResetInput }) {
     if (!user) return null
 
-    const colors = getRiskColor(user.risk)
+    const burnoutColors = getRiskColor(user.risk)
+    const mentalColors = getMentalHealthColor(user.mentalHealth)
 
     // Generate mock academic & lifestyle load for detail page completeness
     const mockDetails = {
@@ -109,31 +102,34 @@ function UserDetailModal({ user, onClose, onToggleSuspend, onDelete }) {
                                 <Calendar size={20} />
                             </div>
                             <div>
-                                <span className="text-xs text-slate-400 font-medium">Program Studi / Semester</span>
-                                <p className="text-sm font-semibold text-slate-800 mt-0.5">{user.prodi} (Semester {user.semester})</p>
+                                <span className="text-xs text-slate-400 font-medium">Semester</span>
+                                <p className="text-sm font-semibold text-slate-800 mt-0.5">Semester {user.semester}</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Status Burnout */}
+                    {/* Status AI Output */}
                     <div className="border border-slate-100 rounded-2xl p-5 space-y-4">
-                        <div className="flex justify-between items-center">
+                        <div className="flex justify-between items-center mb-1">
                             <h5 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
                                 <BarChart3 size={16} className="text-slate-400" />
-                                Hasil Analisis Burnout Terakhir
+                                Hasil Analisis AI Terakhir
                             </h5>
-                            <span className={`inline-flex px-3 py-0.5 rounded-full text-xs font-bold border ${colors.bg} ${colors.text} ${colors.border}`}>
-                                Risiko {user.risk}
-                            </span>
                         </div>
-
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-end">
-                                <span className="text-xs text-slate-500 font-medium">Skor Burnout</span>
-                                <span className={`text-base font-extrabold ${colors.text}`}>{user.lastBurnout}%</span>
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="flex-1 bg-slate-50 border border-slate-100 rounded-xl p-4">
+                                <span className="text-xs text-slate-400 font-medium uppercase tracking-wide block mb-2">Prediksi Burnout</span>
+                                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border ${burnoutColors.bg} ${burnoutColors.border}`}>
+                                    <div className={`w-2 h-2 rounded-full ${burnoutColors.dot}`} />
+                                    <span className={`text-xs font-bold ${burnoutColors.text}`}>{user.risk}</span>
+                                </div>
                             </div>
-                            <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-                                <div className={`h-full ${colors.progress} transition-all duration-500`} style={{ width: `${user.lastBurnout}%` }} />
+                            <div className="flex-1 bg-slate-50 border border-slate-100 rounded-xl p-4">
+                                <span className="text-xs text-slate-400 font-medium uppercase tracking-wide block mb-2">Kesehatan Mental</span>
+                                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border ${mentalColors.bg} ${mentalColors.border}`}>
+                                    <div className={`w-2 h-2 rounded-full ${mentalColors.dot}`} />
+                                    <span className={`text-xs font-bold ${mentalColors.text}`}>{user.mentalHealth}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -169,8 +165,14 @@ function UserDetailModal({ user, onClose, onToggleSuspend, onDelete }) {
 
                 {/* Footer Modal (Aksi) */}
                 <div className="px-6 py-5 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row gap-3 justify-between items-center">
-                    {/* Aksi Berbahaya (Suspend / Hapus) */}
-                    <div className="flex gap-2 w-full sm:w-auto">
+                    {/* Aksi Berbahaya (Suspend / Hapus / Reset) */}
+                    <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                        <button
+                            onClick={() => { onResetInput(user.id); }}
+                            className="flex-1 sm:flex-initial h-10 px-4 rounded-xl border border-blue-200 bg-blue-50 text-blue-600 text-sm font-semibold hover:bg-blue-100 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                            <Calendar size={14} /> Reset Input Hari Ini
+                        </button>
                         {user.isSuspended ? (
                             <button
                                 onClick={() => { onToggleSuspend(user.id); }}

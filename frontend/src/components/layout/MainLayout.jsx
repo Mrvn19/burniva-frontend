@@ -7,7 +7,7 @@ import { ROUTES } from '../../utils/constants'
 
 const pageMeta = {
   [ROUTES.DASHBOARD]: { title: 'Dashboard',      subtitle: 'Pantau kondisi mental kamu hari ini' },
-  [ROUTES.INPUT]:     { title: 'Cek Harian',     subtitle: 'Jawab beberapa pertanyaan untuk mendapatkan analisis AI' },
+  [ROUTES.INPUT]:     { title: 'Cek Harian',     subtitle: 'Isi check-in harian untuk mendapatkan analisis burnout dan rekomendasi personal berbasis AI.' },
   [ROUTES.TODO]:      { title: 'To-Do',          subtitle: 'Daftar tugas harian dari rekomendasi AI' },
   [ROUTES.HISTORY]:   { title: 'Riwayat',        subtitle: 'Catatan kondisi mental kamu sebelumnya' },
   [ROUTES.PROFILE]:   { title: 'Profil',         subtitle: 'Informasi akun kamu' },

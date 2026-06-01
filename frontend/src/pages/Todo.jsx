@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { classNames } from '../utils/helpers'
 import ProgressBar from '../components/ui/ProgressBar'
+import LoadingScreen from '../components/common/LoadingScreen'
 
 const ICONS = {
   coffee: <Coffee size={16} />,
@@ -298,7 +299,7 @@ function TodoItem({ todo, onToggle, onDelete }) {
           </span>
           <span className={classNames(
             'text-[9px] md:text-[10px] px-1.5 md:px-2 py-0.5 rounded-full font-bold uppercase tracking-wider leading-none flex items-center',
-            todo.category === 'AI Suggestion'
+            todo.category.startsWith('AI')
               ? 'bg-indigo-50 text-indigo-600 border border-indigo-100'
               : 'bg-slate-100 text-slate-500 border border-slate-200'
           )}>
@@ -336,15 +337,24 @@ function Todo() {
       setLoading(true);
       const data = await getTodos();
       const mapPriority = { high: 'Tinggi', medium: 'Sedang', low: 'Rendah' };
-      const formatted = data.map(t => ({
-        id: t.id,
-        title: t.title,
-        desc: t.description,
-        priority: mapPriority[t.priority] || 'Sedang',
-        category: t.generated_by_ai ? 'AI Suggestion' : 'Personal',
-        icon: t.generated_by_ai ? 'sparkles' : 'coffee',
-        done: t.status === 'completed'
-      }));
+      const formatted = data.map(t => {
+        let categoryName = 'Personal';
+        if (t.generated_by_ai) {
+          categoryName = t.source === 'gemini' ? 'AI (Gemini)' : 
+                         t.source === 'fallback' ? 'AI (Fallback)' : 'AI Suggestion';
+        }
+        
+        return {
+          id: t.id,
+          title: t.title,
+          desc: t.description,
+          priority: mapPriority[t.priority] || 'Sedang',
+          category: categoryName,
+          icon: t.generated_by_ai ? 'sparkles' : 'coffee',
+          done: t.status === 'completed',
+          source: t.source
+        };
+      });
       setTodos(formatted);
     } catch (error) {
       console.error(error);
@@ -406,6 +416,10 @@ function Todo() {
 
   if (showAdd) {
     return <AddTodo onBack={() => setShowAdd(false)} onSave={handleSave} />
+  }
+
+  if (loading && todos.length === 0) {
+    return <LoadingScreen text="Memuat to-do list..." />
   }
 
   return (

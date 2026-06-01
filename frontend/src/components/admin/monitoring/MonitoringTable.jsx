@@ -11,16 +11,18 @@ function MonitoringTable({ data = [], activePeriod = 'mingguan', onPeriodChange 
 
     // Helper for risk badge styling
     const getRiskBadgeStyles = (risk) => {
-        switch (risk?.toLowerCase()) {
-            case 'tinggi':
-                return 'bg-red-50 text-red-600 border-red-100'
-            case 'sedang':
-                return 'bg-amber-50 text-amber-600 border-amber-100'
-            case 'rendah':
-                return 'bg-emerald-50 text-emerald-600 border-emerald-100'
-            default:
-                return 'bg-slate-50 text-slate-600 border-slate-100'
-        }
+        const l = (risk || '').toLowerCase();
+        if (l === 'high' || l === 'tinggi') return 'bg-red-50 text-red-600 border-red-100';
+        if (l === 'medium' || l === 'sedang') return 'bg-amber-50 text-amber-600 border-amber-100';
+        if (l === 'low' || l === 'rendah') return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+        return 'bg-slate-50 text-slate-600 border-slate-100';
+    }
+
+    const getMentalHealthBadgeStyles = (status) => {
+        const s = (status || '').toLowerCase();
+        if (s === 'baik') return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+        if (s === 'buruk') return 'bg-red-50 text-red-600 border-red-100';
+        return 'bg-slate-50 text-slate-600 border-slate-100';
     }
 
     const [currentPage, setCurrentPage] = useState(1)
@@ -73,8 +75,8 @@ function MonitoringTable({ data = [], activePeriod = 'mingguan', onPeriodChange 
                     <thead>
                         <tr className="bg-slate-50/75 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                             <th className="py-4 px-6">Nama User</th>
-                            <th className="py-4 px-6">Burnout Score</th>
-                            <th className="py-4 px-6">Risiko</th>
+                            <th className="py-4 px-6">Kesehatan Mental</th>
+                            <th className="py-4 px-6">Prediksi Burnout</th>
                             <th className="py-4 px-6">Tanggal Assessment</th>
                         </tr>
                     </thead>
@@ -94,8 +96,13 @@ function MonitoringTable({ data = [], activePeriod = 'mingguan', onPeriodChange 
                                     <td className="py-4 px-6 font-semibold text-slate-800">
                                         {row.name}
                                     </td>
-                                    <td className="py-4 px-6 text-slate-600 font-medium">
-                                        {row.score}
+                                    <td className="py-4 px-6">
+                                        <span className={classNames(
+                                            'px-3 py-1 rounded-full text-xs font-bold border inline-block tracking-wide',
+                                            getMentalHealthBadgeStyles(row.mentalHealth)
+                                        )}>
+                                            {row.mentalHealth}
+                                        </span>
                                     </td>
                                     <td className="py-4 px-6">
                                         <span className={classNames(

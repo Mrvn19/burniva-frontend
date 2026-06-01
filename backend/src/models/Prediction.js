@@ -56,6 +56,21 @@ const Prediction = sequelize.define("Prediction", {
   recommendation: {
     type: DataTypes.TEXT,
     allowNull: true
+  },
+
+  daily_insight: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+
+  daily_recommendations: {
+    type: DataTypes.JSONB,
+    allowNull: true
+  },
+
+  mood_today: {
+    type: DataTypes.STRING(50),
+    allowNull: true
   }
 
 }, {

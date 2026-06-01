@@ -34,8 +34,8 @@ function PenggunaAdmin() {
                 univ: u.university || '-',
                 prodi: u.major || '-',
                 semester: u.semester || '-',
-                lastBurnout: u.last_burnout_score || 0,
-                risk: u.last_burnout_level || 'Belum ada',
+                risk: u.last_burnout_prediction || 'Belum ada',
+                mentalHealth: u.last_mental_health_prediction || 'N/A',
                 isSuspended: u.is_suspended,
                 createdAt: u.createdAt,
                 totalAssessments: u.total_assessments
@@ -76,7 +76,7 @@ function PenggunaAdmin() {
             try {
                 setIsLoading(true);
                 await adminService.deleteUser(id)
-                await fetchUsers() // Refresh data (AWAIT added)
+                await fetchUsers() // Refresh data
                 setCurrentPage(1)
                 if (selectedUser && selectedUser.id === id) {
                     setSelectedUser(null)
@@ -84,6 +84,26 @@ function PenggunaAdmin() {
             } catch (error) {
                 console.error("Gagal menghapus pengguna", error)
                 alert("Gagal menghapus pengguna")
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    }
+
+    // Fungsi reset input harian user
+    const resetInput = async (id) => {
+        if (window.confirm('Yakin ingin mereset akses Cek Harian pengguna ini untuk hari ini? Data assessment hari ini akan dihapus.')) {
+            try {
+                setIsLoading(true);
+                const res = await adminService.resetDailyInput(id);
+                alert(res.message || "Akses berhasil di-reset.");
+                await fetchUsers(); // Refresh data
+                if (selectedUser && selectedUser.id === id) {
+                    setSelectedUser(null);
+                }
+            } catch (error) {
+                console.error("Gagal mereset akses pengguna", error);
+                alert(error.response?.data?.message || "Gagal mereset akses pengguna");
             } finally {
                 setIsLoading(false);
             }
@@ -166,6 +186,7 @@ function PenggunaAdmin() {
                     onClose={() => setSelectedUser(null)}
                     onToggleSuspend={toggleSuspend}
                     onDelete={deleteUser}
+                    onResetInput={resetInput}
                 />
             )}
 

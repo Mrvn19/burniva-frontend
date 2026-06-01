@@ -8,7 +8,7 @@ import { classNames } from '../../utils/helpers'
 
 const navItems = [
   { label: 'Dashboard', icon: LayoutDashboard, path: ROUTES.DASHBOARD },
-  { label: 'Input',     icon: ClipboardList,   path: ROUTES.INPUT     },
+  { label: 'Cek Harian', icon: ClipboardList,   path: ROUTES.INPUT     },
   { label: 'To-Do',     icon: CheckSquare,     path: ROUTES.TODO      },
   { label: 'Riwayat',   icon: History,         path: ROUTES.HISTORY   },
   { label: 'Profil',    icon: User,            path: ROUTES.PROFILE   },

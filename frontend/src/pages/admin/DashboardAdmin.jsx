@@ -4,12 +4,14 @@ import StatsCards from '../../components/admin/dashboard/StatsCards'
 import AnalyticsCharts from '../../components/admin/dashboard/AnalyticsCharts'
 import RecentActivities from '../../components/admin/dashboard/RecentActivities'
 import adminService from '../../services/admin/adminService'
+import LoadingScreen from '../../components/common/LoadingScreen'
 
 function DashboardAdmin() {
     const [stats, setStats] = useState(null)
     const [analytics, setAnalytics] = useState(null)
     const [activities, setActivities] = useState([])
     const [isRefreshing, setIsRefreshing] = useState(false)
+    const [loading, setLoading] = useState(true)
 
     const fetchData = async () => {
         try {
@@ -26,6 +28,7 @@ function DashboardAdmin() {
             console.error("Failed to fetch dashboard data", error)
         } finally {
             setIsRefreshing(false)
+            setLoading(false)
         }
     }
 
@@ -41,6 +44,10 @@ function DashboardAdmin() {
             { name: 'Sedang', value: stats.burnoutSedang, color: '#f59e0b' },
             { name: 'Tinggi', value: stats.burnoutTinggi, color: '#ef4444' }
         ]
+    }
+
+    if (loading) {
+        return <LoadingScreen text="Memuat metrik sistem..." />
     }
 
     return (

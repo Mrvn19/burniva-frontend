@@ -1,4 +1,4 @@
-const { User, DailyInput, Todo } = require("../models");
+const { User, DailyInput, Todo, Prediction } = require("../models");
 const { Op } = require("sequelize");
 
 // GET STATS (Dashboard)
@@ -65,6 +65,7 @@ const getAllUsers = async (req, res) => {
     const usersWithStats = await Promise.all(users.map(async (user) => {
       const lastInput = await DailyInput.findOne({
         where: { user_id: user.id },
+        include: [{ model: Prediction }],
         order: [['createdAt', 'DESC']]
       });
       
@@ -72,8 +73,8 @@ const getAllUsers = async (req, res) => {
 
       return {
         ...user.toJSON(),
-        last_burnout_score: lastInput ? lastInput.burnout_score : null,
-        last_burnout_level: lastInput ? lastInput.burnout_level : null,
+        last_burnout_prediction: lastInput?.Prediction?.burnout_prediction || lastInput?.burnout_level || 'Belum ada',
+        last_mental_health_prediction: lastInput?.Prediction?.mental_health_prediction || 'N/A',
         total_assessments: assessmentsCount
       };
     }));
@@ -114,6 +115,54 @@ const suspendUser = async (req, res) => {
     await user.save();
 
     res.json({ message: user.is_suspended ? "User ditangguhkan" : "Status suspend dicabut", user });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// RESET DAILY INPUT (Allow user to submit again today)
+const resetDailyInput = async (req, res) => {
+  try {
+    const { Op } = require("sequelize");
+    const userId = req.params.id;
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Cari DailyInput hari ini
+    const dailyInput = await DailyInput.findOne({
+      where: {
+        user_id: userId,
+        createdAt: {
+          [Op.between]: [startOfDay, endOfDay]
+        }
+      }
+    });
+
+    if (!dailyInput) {
+      return res.status(404).json({ message: "User belum melakukan assessment hari ini" });
+    }
+
+    // Hapus Prediction yang berelasi
+    await Prediction.destroy({ where: { daily_input_id: dailyInput.id } });
+    
+    // Hapus Todo AI yang di-generate hari ini (karena AI akan generate ulang)
+    await Todo.destroy({
+      where: {
+        user_id: userId,
+        generated_by_ai: true,
+        createdAt: {
+          [Op.between]: [startOfDay, endOfDay]
+        }
+      }
+    });
+
+    // Hapus DailyInput
+    await dailyInput.destroy();
+
+    res.json({ message: "Akses Cek Harian berhasil di-reset. User dapat mengisi ulang hari ini." });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -162,15 +211,18 @@ const getMonitoringData = async (req, res) => {
 
     const inputs = await DailyInput.findAll({
       where: dateFilter,
-      include: [{ model: User, attributes: ['name', 'email'] }],
+      include: [
+        { model: User, attributes: ['name', 'email'] },
+        { model: Prediction }
+      ],
       order: [['createdAt', 'DESC']]
     });
 
     const formatted = inputs.map(input => ({
       id: input.id,
       name: input.User?.name || 'Unknown',
-      score: input.burnout_score,
-      risk: input.burnout_level,
+      mentalHealth: input.Prediction?.mental_health_prediction || 'N/A',
+      risk: input.Prediction?.burnout_prediction || input.burnout_level,
       date: input.createdAt.toISOString().split('T')[0]
     }));
 
@@ -398,12 +450,15 @@ const getFilterOptions = async (req, res) => {
 const exportAssessmentData = async (req, res) => {
   try {
     const inputs = await DailyInput.findAll({
-      include: [{ model: User, attributes: ['name', 'email', 'university', 'major'] }],
+      include: [
+        { model: User, attributes: ['name', 'email', 'university', 'major'] },
+        { model: Prediction }
+      ],
       order: [['createdAt', 'DESC']]
     });
 
     // Buat Header CSV
-    const csvHeader = "ID,Nama,Email,Universitas,Program Studi,Skor Burnout,Tingkat Risiko,Jam Tidur,Tanggal Assessment\n";
+    const csvHeader = "ID,Nama,Email,Universitas,Program Studi,Kesehatan Mental,Prediksi Burnout,Jam Tidur,Tanggal Assessment\n";
     
     // Buat Baris CSV
     const csvRows = inputs.map(input => {
@@ -418,8 +473,8 @@ const exportAssessmentData = async (req, res) => {
         escapeCSV(u.email),
         escapeCSV(u.university),
         escapeCSV(u.major),
-        input.burnout_score,
-        input.burnout_level,
+        input.Prediction?.mental_health_prediction || 'N/A',
+        input.Prediction?.burnout_prediction || input.burnout_level,
         input.sleep_hours || 0,
         date
       ].join(',');
@@ -443,7 +498,10 @@ const xlsx = require('xlsx');
 const exportExcelData = async (req, res) => {
   try {
     const inputs = await DailyInput.findAll({
-      include: [{ model: User, attributes: ['name', 'email', 'university', 'major'] }],
+      include: [
+        { model: User, attributes: ['name', 'email', 'university', 'major'] },
+        { model: Prediction }
+      ],
       order: [['createdAt', 'DESC']]
     });
 
@@ -457,8 +515,8 @@ const exportExcelData = async (req, res) => {
         'Email': u.email || '',
         'Universitas': u.university || '',
         'Program Studi': u.major || '',
-        'Skor Burnout': input.burnout_score,
-        'Tingkat Risiko': input.burnout_level,
+        'Kesehatan Mental': input.Prediction?.mental_health_prediction || 'N/A',
+        'Prediksi Burnout': input.Prediction?.burnout_prediction || input.burnout_level,
         'Jam Tidur': input.sleep_hours || 0,
         'Tanggal Assessment': date
       };
@@ -474,8 +532,8 @@ const exportExcelData = async (req, res) => {
       { wch: 30 }, // Email
       { wch: 35 }, // Univ
       { wch: 25 }, // Prodi
-      { wch: 15 }, // Skor
-      { wch: 15 }, // Risiko
+      { wch: 20 }, // Kesehatan Mental
+      { wch: 20 }, // Prediksi Burnout
       { wch: 10 }, // Tidur
       { wch: 20 }, // Tanggal
     ];
@@ -502,6 +560,7 @@ module.exports = {
   getAllUsers,
   getUserById,
   suspendUser,
+  resetDailyInput,
   deleteUser,
   getMonitoringData,
   getAnalyticsData,

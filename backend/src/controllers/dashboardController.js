@@ -1,4 +1,4 @@
-const { DailyInput } = require("../models");
+const { DailyInput, Prediction } = require("../models");
 
 const getDashboard = async (req, res) => {
   try {
@@ -10,6 +10,13 @@ const getDashboard = async (req, res) => {
         ["createdAt","DESC"]
       ]
     });
+
+    let latestPrediction = null;
+    if (latest) {
+      latestPrediction = await Prediction.findOne({
+        where: { daily_input_id: latest.id }
+      });
+    }
 
     const history = await DailyInput.findAll({
       where: {
@@ -28,6 +35,7 @@ const getDashboard = async (req, res) => {
 
     res.json({
       latest,
+      latestPrediction,
       trend
     });
 

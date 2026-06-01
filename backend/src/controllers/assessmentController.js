@@ -30,6 +30,28 @@ const createAssessment =
       const { predictMentalHealth } = require('../services/aiPredictionService');
       const { Prediction } = require('../models');
 
+      const { Op } = require('sequelize');
+
+      // 0. Cegah Input Ganda di Hari yang Sama
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const existingAssessment = await DailyInput.findOne({
+        where: {
+          user_id: userId,
+          createdAt: {
+            [Op.gte]: startOfDay,
+          },
+        },
+      });
+
+      if (existingAssessment) {
+        return res.status(400).json({
+          message: 'Anda sudah mengisi asesmen hari ini. Silakan kembali besok untuk mengisi data harian baru.',
+          assessment: existingAssessment
+        });
+      }
+
       // Kalkulasi skor mentah (Maksimum 70)
       const rawScore = stress + anxiety + emotional_pressure + academic_pressure + financial_pressure + family_expectation + (10 - social_support);
       
@@ -75,6 +97,47 @@ const createAssessment =
       }
 
       // =================
+      // AI TODO GENERATION (GEMINI)
+      // =================
+      const { todos: generatedTodos, source: todoSource } = await generatePersonalizedTodos(burnoutLevel, mentalHealthPred, req.body, totalScore);
+
+      // Duplicate Prevention: Hapus todo AI lama yang masih pending
+      await Todo.destroy({
+        where: {
+          user_id: userId,
+          generated_by_ai: true,
+          status: 'pending'
+        }
+      });
+
+      // Mapping format untuk database
+      const todosToSave = generatedTodos.map(todo => ({
+        user_id: userId,
+        title: todo.title,
+        description: todo.description,
+        priority: todo.priority || 'medium',
+        status: 'pending',
+        generated_by_ai: true,
+        source: todoSource
+      }));
+
+      // =================
+      // DERIVE MOOD & INSIGHT
+      // =================
+      let moodToday = req.body.mood_today;
+      if (!moodToday) {
+        if (totalScore <= 20) moodToday = 'Sangat Baik';
+        else if (totalScore <= 40) moodToday = 'Baik';
+        else if (totalScore <= 60) moodToday = 'Lelah';
+        else if (totalScore <= 80) moodToday = 'Stres Berat';
+        else moodToday = 'Kritis';
+      }
+
+      const dailyInsightText = `Hari ini kondisimu berada di level ${burnoutLevel} dengan skor ${totalScore}%. Berdasarkan analisis, kamu perlu memperhatikan ${
+        stress > 6 ? 'tingkat stres' : sleep_hours < 6 ? 'jam tidur' : 'beban aktivitas'
+      }mu.`;
+
+      // =================
       // SAVE DATABASE
       // =================
 
@@ -88,43 +151,23 @@ const createAssessment =
         recommendation,
       });
 
-      // 2. Simpan ke tabel Predictions (Instruksi Phase 4 & Phase 5)
+      // 2. Simpan ke tabel Predictions (Phase 4 & 5)
       await Prediction.create({
         daily_input_id: assessment.id,
         user_id: userId,
         risk_level: burnoutLevel,
         burnout_score: totalScore,
-        mental_health_index: 0, // Placeholder, AI saat ini tidak mereturn index numerical
+        mental_health_index: 0, 
         analysis_text: mentalHealthPred,
         recommendation: recommendation.join(', '),
         burnout_prediction: aiResult.success && !aiResult.fallback ? aiResult.data.burnout_prediction : 'N/A',
         mental_health_prediction: mentalHealthPred,
-        raw_assessment_input: req.body
+        raw_assessment_input: req.body,
+        // FIELD BARU PHASE 4
+        daily_insight: dailyInsightText,
+        daily_recommendations: generatedTodos, // JSONB array of todos
+        mood_today: moodToday
       });
-
-      // =================
-      // AI TODO GENERATION (GEMINI)
-      // =================
-      const geminiTodos = await generatePersonalizedTodos(burnoutLevel, mentalHealthPred, req.body);
-      
-      // Duplicate Prevention: Hapus todo AI lama yang masih pending
-      await Todo.destroy({
-        where: {
-          user_id: userId,
-          generated_by_ai: true,
-          status: 'pending'
-        }
-      });
-
-      // Mapping format untuk database
-      const todosToSave = geminiTodos.map(todo => ({
-        user_id: userId,
-        title: todo.title,
-        description: todo.description,
-        priority: todo.priority || 'medium',
-        status: 'pending',
-        generated_by_ai: true
-      }));
 
       // Simpan Todo baru
       if (todosToSave.length > 0) {

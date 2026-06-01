@@ -9,6 +9,7 @@ import {
 import { ROUTES } from '../utils/constants'
 import { classNames } from '../utils/helpers'
 import { getHistory } from '../services/historyService'
+import LoadingScreen from '../components/common/LoadingScreen'
 
 const levelConfig = {
   Tinggi: { color: 'text-red-500', bg: 'bg-red-50' },
@@ -43,92 +44,75 @@ function History() {
     }
   }
 
-  // Generate chart data: API gives DESC (newest first). Chart needs ASC (oldest first).
-  const chartData = history.slice().reverse().map(item => ({
-    date: new Date(item.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }),
-    value: item.burnout_score
-  }))
+  // Mapping Burnout
+  const getBurnoutUI = (level) => {
+    const l = (level || '').toLowerCase();
+    if (l === 'low' || l === 'rendah') return { label: 'Rendah', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200' };
+    if (l === 'medium' || l === 'sedang') return { label: 'Sedang', color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-200' };
+    if (l === 'high' || l === 'tinggi') return { label: 'Tinggi', color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200' };
+    return { label: 'Belum ada', color: 'text-slate-700', bg: 'bg-slate-50', border: 'border-slate-200' };
+  };
+
+  // Mapping Mental Health
+  const getMentalHealthUI = (status) => {
+    const s = (status || '').toLowerCase();
+    if (s === 'baik') return { label: 'Stabil', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200' };
+    if (s === 'buruk') return { label: 'Perlu Perhatian', color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200' };
+    return { label: 'Belum ada', color: 'text-slate-700', bg: 'bg-slate-50', border: 'border-slate-200' };
+  };
+
+  if (loading) {
+    return <LoadingScreen text="Memuat riwayat..." />
+  }
 
   return (
     <div className="p-4 pb-24 md:p-6 md:pb-6 max-w-3xl mx-auto">
-
-      {/* Card Grafik */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-card p-5 mb-4">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h2 className="text-base font-bold text-[#0a0a0a]">Tren Skor Burnout</h2>
-            <p className="text-xs text-[#6A7282]">Pantau perkembangan kamu dari waktu ke waktu</p>
-          </div>
-          <div className="px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-lg text-xs font-medium text-slate-500">
-            Dinamis
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="h-[240px] flex items-center justify-center text-slate-400 text-sm">
-            Memuat grafik...
-          </div>
-        ) : (
-          <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
-              <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-              <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-              <Tooltip
-                contentStyle={{ borderRadius: '10px', border: '1px solid #E5E7EB', fontSize: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
-                formatter={v => [`${v}%`, 'Skor Burnout']}
-                cursor={{ stroke: '#E5E7EB' }}
-              />
-              <Line type="monotone" dataKey="value" stroke="#006D5B" strokeWidth={2.5} dot={<CustomDot />} activeDot={{ r: 7, fill: '#006D5B', stroke: 'white', strokeWidth: 2 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        )}
-      </div>
-
+      
       {/* Riwayat Harian */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-card p-5">
-        <h3 className="text-base font-bold text-[#0a0a0a] mb-1">Riwayat Harian</h3>
-        <p className="text-xs text-[#6A7282] mb-4">Catatan kondisi mental kamu</p>
-
-        {loading ? (
-          <div className="py-8 text-center text-sm text-slate-400">Memuat riwayat...</div>
-        ) : (
-          <>
-            <div className="flex flex-col divide-y divide-slate-50">
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_4px_12px_rgb(0,0,0,0.03)] p-5 md:p-6">
+        <h3 className="text-lg font-bold text-slate-800 mb-1">Riwayat Harian</h3>
+        <p className="text-sm text-slate-500 mb-6">Catatan kondisi mental dan analisis dari waktu ke waktu</p>
+        
+        <div className="flex flex-col gap-4">
               {history.map((item) => {
-                const cfg = levelConfig[item.burnout_level] || levelConfig['Sedang']
+                const burnoutUI = getBurnoutUI(item.Prediction?.burnout_prediction || item.burnout_level);
+                const mentalUI = getMentalHealthUI(item.Prediction?.mental_health_prediction);
+
                 return (
                   <div
                     key={item.id}
                     onClick={() => navigate(ROUTES.HISTORY_DETAIL.replace(':id', item.id))}
-                    className="flex items-center gap-4 py-4 hover:bg-slate-50 -mx-2 px-2 rounded-xl cursor-pointer transition-colors first:pt-0 last:pb-0"
+                    className="flex flex-col p-5 bg-slate-50/50 hover:bg-slate-50 border border-slate-100 rounded-2xl cursor-pointer transition-all hover:shadow-md gap-3"
                   >
-                    <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
-                      <Calendar size={16} className="text-slate-400" />
-                    </div>
-
-                    <div className="flex-1 min-w-0 flex flex-col gap-1.5">
-                      <p className="text-sm font-medium text-[#0a0a0a]">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                      <div className="flex items-center gap-2.5 text-sm font-bold text-slate-800">
+                        <Calendar size={16} className="text-slate-400" />
                         {new Date(item.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                      </p>
-                      
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className={classNames('text-[10px] font-bold px-2 py-0.5 rounded-md border', cfg.color, cfg.bg, 'border-current/10')}>
-                          Burnout: {item.burnout_level}
-                        </span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md border text-indigo-700 bg-indigo-50 border-indigo-200">
-                          Mental: {item.Prediction?.mental_health_prediction || 'N/A'}
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-slate-500 w-24">Prediksi Burnout:</span>
+                        <span className={classNames('text-xs font-bold px-2.5 py-1 rounded-lg border', burnoutUI.color, burnoutUI.bg, burnoutUI.border)}>
+                          {burnoutUI.label}
                         </span>
                       </div>
-
-                      <p className="text-xs text-slate-500 truncate mt-0.5">
-                        <span className="font-medium">Summary:</span> {item.stress} Stres • {item.anxiety} Cemas • {item.sleep_hours} Jam Tidur • {item.study_hours} Jam Belajar
-                      </p>
+                      
+                      <div className="hidden sm:block w-px h-4 bg-slate-200" />
+                      
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-slate-500 w-24 sm:w-auto">Mental Health:</span>
+                        <span className={classNames('text-xs font-bold px-2.5 py-1 rounded-lg border', mentalUI.color, mentalUI.bg, mentalUI.border)}>
+                          {mentalUI.label}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-xl font-bold text-[#0a0a0a]">{item.burnout_score}%</p>
-                      <p className="text-xs text-[#6A7282]">Skor</p>
+                    <div className="mt-1 bg-white p-3 rounded-xl border border-slate-100">
+                      <p className="text-[13px] text-slate-600 leading-relaxed italic">
+                        "{item.Prediction?.daily_insight || 'Belum ada insight harian untuk tanggal ini.'}"
+                      </p>
                     </div>
                   </div>
                 )
@@ -139,17 +123,15 @@ function History() {
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <Calendar size={32} className="text-slate-300 mb-3" />
                 <p className="text-sm font-medium text-slate-500 mb-1">Belum ada riwayat</p>
-                <p className="text-xs text-slate-400 mb-4">Mulai input data harian untuk melihat perkembangan kamu</p>
+                <p className="text-xs text-slate-400 mb-4">Mulai cek harian untuk melihat perkembangan kamu</p>
                 <button
                   onClick={() => navigate(ROUTES.INPUT)}
-                  className="h-9 px-4 bg-primary-500 text-white text-xs font-semibold rounded-xl hover:bg-primary-700 transition-all"
+                  className="h-10 px-6 bg-primary-600 text-white text-sm font-semibold rounded-xl hover:bg-primary-700 transition-all shadow-md"
                 >
-                  Input Sekarang
+                  Cek Sekarang
                 </button>
               </div>
             )}
-          </>
-        )}
       </div>
 
     </div>

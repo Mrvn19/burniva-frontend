@@ -12,6 +12,7 @@ router.get("/stats", adminController.getStats);
 router.get("/users", adminController.getAllUsers);
 router.get("/users/:id", adminController.getUserById);
 router.put("/users/:id/suspend", adminController.suspendUser);
+router.delete("/users/:id/reset-input", adminController.resetDailyInput);
 router.delete("/users/:id", adminController.deleteUser);
 router.get("/monitoring", adminController.getMonitoringData);
 router.get("/analytics", adminController.getAnalyticsData);

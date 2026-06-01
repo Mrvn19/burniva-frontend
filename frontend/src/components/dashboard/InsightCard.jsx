@@ -2,7 +2,10 @@ import { Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../utils/constants'
 
-function InsightCard({ insight = 'Tingkat stresmu sedang menanjak tajam. Sangat disarankan untuk segera menyelesaikan tugas prioritas dan mengambil jeda yang cukup malam ini.' }) {
+function InsightCard({ 
+  insight = 'Tingkat stresmu sedang menanjak tajam. Sangat disarankan untuk segera menyelesaikan tugas prioritas dan mengambil jeda yang cukup malam ini.',
+  hasTodayData = false
+}) {
   const navigate = useNavigate()
 
   return (
@@ -15,19 +18,32 @@ function InsightCard({ insight = 'Tingkat stresmu sedang menanjak tajam. Sangat 
         <div className="w-10 h-10 rounded-full bg-primary-500 shadow-sm flex items-center justify-center text-white">
           <Sparkles size={18} />
         </div>
-        <span className="text-lg font-semibold text-primary-500">Insight AI Hari Ini</span>
+        <span className="text-lg font-semibold text-primary-500">
+          {hasTodayData ? 'Insight AI Hari Ini' : 'Belum Ada Insight'}
+        </span>
       </div>
 
       <p className="relative z-10 text-sm text-gray-700 leading-relaxed mb-6">
-        {insight}
+        {hasTodayData 
+          ? insight 
+          : 'Burniva belum bisa memberikan insight hari ini. Selesaikan Cek Harian terlebih dahulu agar AI kami dapat menganalisis kondisimu.'}
       </p>
 
-      <button
-        onClick={() => navigate(ROUTES.RESULT)}
-        className="relative z-10 text-sm text-primary-500 font-medium bg-white border border-primary-200 rounded-xl px-4 py-3 hover:bg-primary-50 transition-colors w-full text-center shadow-sm"
-      >
-        Lihat Rekomendasi Detail
-      </button>
+      {hasTodayData ? (
+        <button
+          onClick={() => navigate(ROUTES.RESULT)}
+          className="relative z-10 text-sm text-primary-500 font-medium bg-white border border-primary-200 rounded-xl px-4 py-3 hover:bg-primary-50 transition-colors w-full text-center shadow-sm"
+        >
+          Lihat Rekomendasi Detail
+        </button>
+      ) : (
+        <button
+          onClick={() => navigate(ROUTES.INPUT)}
+          className="relative z-10 text-sm text-white font-medium bg-primary-500 rounded-xl px-4 py-3 hover:bg-primary-600 transition-colors w-full text-center shadow-sm"
+        >
+          Mulai Cek Harian
+        </button>
+      )}
     </div>
   )
 }

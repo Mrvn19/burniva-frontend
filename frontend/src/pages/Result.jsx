@@ -4,6 +4,7 @@ import { Sparkles, ArrowRight, RotateCcw, ArrowLeft, ListChecks } from 'lucide-r
 import { ROUTES } from '../utils/constants';
 import ResultCard from '../components/result/ResultCard';
 import FactorBreakdown from '../components/result/FactorBreakdown';
+import LoadingScreen from '../components/common/LoadingScreen';
 import { getHistoryDetail } from '../services/historyService';
 
 function Result() {
@@ -41,6 +42,32 @@ function Result() {
     loadData();
   }, [urlId, isDetailMode]);
 
+  // Update Topbar Title dynamically if we are in History Detail mode
+  useEffect(() => {
+    if (isDetailMode && result?.createdAt) {
+      const dateStr = new Date(result.createdAt).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+      const titleEl = document.getElementById('topbar-title');
+      const subtitleEl = document.getElementById('topbar-subtitle');
+      if (titleEl) titleEl.innerText = dateStr;
+      if (subtitleEl) subtitleEl.innerText = 'Detail Riwayat Assessment';
+    }
+
+    // Cleanup: Reset title when component unmounts
+    return () => {
+      const titleEl = document.getElementById('topbar-title');
+      const subtitleEl = document.getElementById('topbar-subtitle');
+      // Only reset if we are navigating away from detail mode
+      if (isDetailMode && titleEl) {
+        titleEl.innerText = 'BURNIVA';
+        if (subtitleEl) subtitleEl.innerText = '';
+      }
+    };
+  }, [result?.createdAt, isDetailMode]);
+
   const getFactorLevel = (val) => {
     if (!val) return 'Tidak diketahui';
     if (val >= 7) return 'Tinggi';
@@ -63,7 +90,7 @@ function Result() {
   ];
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">Memuat data...</div>;
+    return <LoadingScreen text="Memuat hasil analisis..." />;
   }
 
   return (
@@ -71,7 +98,7 @@ function Result() {
       <div className="w-full max-w-5xl mx-auto flex flex-col gap-4 md:gap-6">
 
         {/* Kartu Utama */}
-        <ResultCard score={result?.burnout_score || 0} />
+        <ResultCard burnoutLevel={result?.Prediction?.burnout_prediction || result?.burnout_level} />
 
         {/* Grid Skor Detail */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
@@ -84,14 +111,9 @@ function Result() {
             </div>
             <div className="flex flex-col gap-3 flex-1">
               <div className="bg-slate-50 rounded-[10px] border-[0.67px] border-gray-200 p-3 flex items-center justify-between">
-                <span className="text-sm text-gray-500">Skor Burnout</span>
-                <span className="text-2xl font-semibold text-neutral-950">{result?.burnout_score || 0}%</span>
-              </div>
-
-              <div className="bg-slate-50 rounded-[10px] border-[0.67px] border-gray-200 p-3 flex items-center justify-between">
-                <span className="text-sm text-gray-500">Tingkat Burnout</span>
+                <span className="text-sm text-gray-500">Prediksi Burnout</span>
                 <div className="px-3 py-1 bg-orange-50 border-[0.67px] border-orange-300 rounded-lg">
-                  <span className="text-xs font-bold text-orange-600">{result?.burnout_level || 'Belum ada'}</span>
+                  <span className="text-xs font-bold text-orange-600">{result?.Prediction?.burnout_prediction || result?.burnout_level || 'Belum ada'}</span>
                 </div>
               </div>
 
@@ -103,7 +125,7 @@ function Result() {
               </div>
 
               <div className="bg-slate-50 rounded-[10px] border-[0.67px] border-gray-200 p-3 text-xs text-gray-600 mt-auto leading-relaxed">
-                <span className="font-semibold text-gray-800">Insight AI:</span> Berdasarkan kalkulasi, tingkat risiko burnout Anda berada di level <b>{result?.burnout_level}</b> dengan indikasi kesehatan mental <b>{result?.Prediction?.mental_health_prediction || 'N/A'}</b>.
+                <span className="font-semibold text-gray-800">Insight AI:</span> Berdasarkan hasil analisis, tingkat risiko burnout Anda berada di kategori <b>{result?.Prediction?.burnout_prediction || result?.burnout_level}</b> dengan indikasi kesehatan mental <b>{result?.Prediction?.mental_health_prediction || 'N/A'}</b>.
               </div>
             </div>
           </div>

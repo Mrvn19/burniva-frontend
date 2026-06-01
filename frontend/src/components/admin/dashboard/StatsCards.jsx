@@ -13,13 +13,13 @@ const StatCard = ({ icon: Icon, value, label, iconColor, iconBg }) => (
 
 function StatsCards({ stats }) {
     const data = stats || {
-        totalUsers: "1.240",
-        activeToday: "420",
-        totalAssessments: "2.350",
-        aiPredictions: "340",
-        burnoutTinggi: "120",
-        burnoutSedang: "310",
-        burnoutRendah: "810"
+        totalUsers: 0,
+        activeToday: 0,
+        totalAssessments: 0,
+        aiPredictions: 0,
+        burnoutTinggi: 0,
+        burnoutSedang: 0,
+        burnoutRendah: 0
     }
 
     return (

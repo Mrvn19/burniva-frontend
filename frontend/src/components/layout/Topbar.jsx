@@ -48,8 +48,8 @@ function Topbar({ onToggleSidebar, title, subtitle }) {
             <Menu size={20} />
           </button>
           <div>
-            <h1 className="text-base font-semibold text-slate-800 leading-tight">{title}</h1>
-            {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+            <h1 id="topbar-title" className="text-base font-semibold text-slate-800 leading-tight">{title}</h1>
+            {subtitle ? <p id="topbar-subtitle" className="text-xs text-slate-400">{subtitle}</p> : <p id="topbar-subtitle" className="text-xs text-slate-400"></p>}
           </div>
         </div>
 

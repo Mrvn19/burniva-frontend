@@ -198,8 +198,8 @@ function Profile() {
 
   const initial = form?.nama?.charAt(0).toUpperCase() || 'U';
   // Tampilkan preview foto baru secara live di top bar saat edit
-  const displayImage = isEdit 
-    ? (previewImage === '' ? null : (previewImage || user.photoUrl)) 
+  const displayImage = isEdit
+    ? (previewImage === '' ? null : (previewImage || user.photoUrl))
     : user.photoUrl;
 
   return (
@@ -211,10 +211,10 @@ function Profile() {
           <div className="flex items-center gap-3 md:gap-6">
 
             {/* Area Avatar - Ukuran disamakan & proporsional */}
-            <Avatar 
-              src={displayImage} 
-              name={isEdit ? form.nama : user.nama} 
-              className="w-12 h-12 md:w-20 md:h-20 text-lg md:text-3xl rounded-xl md:rounded-2xl border-[0.67px] border-blue-100" 
+            <Avatar
+              src={displayImage}
+              name={isEdit ? form.nama : user.nama}
+              className="w-12 h-12 md:w-20 md:h-20 text-lg md:text-3xl rounded-xl md:rounded-2xl border-[0.67px] border-blue-100"
             />
 
             {/* Nama Pengguna */}

@@ -10,7 +10,7 @@ function PreviewSection() {
       image: dashboardImg,
     },
     {
-      title: 'Input Data',
+      title: 'Cek Harian',
       desc: 'Isi data harian dengan mudah step by step',
       image: inputImg,
     },

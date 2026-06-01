@@ -58,6 +58,11 @@ module.exports = (
           type: DataTypes.UUID,
           allowNull: true,
         },
+        
+        source: {
+          type: DataTypes.STRING,
+          defaultValue: 'system' // 'gemini' or 'fallback' or 'system'
+        }
       },
 
       {

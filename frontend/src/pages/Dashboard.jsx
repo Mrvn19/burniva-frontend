@@ -8,12 +8,23 @@ import SummaryCard from '../components/dashboard/SummaryCard'
 import ChartSection from '../components/dashboard/ChartSection'
 import InsightCard from '../components/dashboard/InsightCard'
 import TodoCard from '../components/dashboard/TodoCard'
+import LoadingScreen from '../components/common/LoadingScreen'
 
-const getInsight = (score) => {
-  if (!score) return "Belum ada analisis. Yuk, isi data harianmu hari ini!";
-  if (score <= 30) return "Kondisi mentalmu cukup baik hari ini. Pertahankan pola tidur dan aktivitas sehat.";
-  if (score <= 60) return "Tingkat stres mulai meningkat. Cobalah mengatur waktu istirahat lebih baik.";
-  return "Tingkat burnout cukup tinggi. Kurangi beban akademik dan prioritaskan kesehatan mental.";
+const getDynamicInsight = (burnoutLevel, mentalHealth) => {
+  if (!burnoutLevel) return "Belum ada analisis. Yuk, isi data harianmu hari ini untuk melihat kondisimu!";
+  
+  const b = burnoutLevel.toLowerCase();
+  const m = mentalHealth ? mentalHealth.toLowerCase() : 'baik';
+
+  if (b === 'low' && m === 'baik') return "Kondisi mentalmu hari ini cukup stabil dengan risiko burnout rendah. Pertahankan pola hidup sehat dan keseimbangan aktivitas.";
+  if (b === 'low' && m === 'buruk') return "Meski risiko burnout rendah, kesehatan mentalmu sedang kurang baik. Mungkin kamu sedang menghadapi stres personal. Luangkan waktu untuk dirimu sendiri.";
+  if (b === 'medium' && m === 'baik') return "Kamu mulai menunjukkan tanda kelelahan ringan. Jangan lupa mengatur waktu istirahat di tengah aktivitas.";
+  if (b === 'medium' && m === 'buruk') return "Kondisi burnout kamu berada di level sedang dengan kesehatan mental yang perlu perhatian. Coba luangkan waktu recovery dan kurangi tekanan.";
+  if (b === 'high' && m === 'baik') return "Kondisimu cukup kelelahan secara fisik/akademik. Kurangi aktivitas berlebih sebelum memengaruhi mentalmu secara langsung.";
+  if (b === 'high' && m === 'buruk') return "Kondisi burnout kamu cukup tinggi hari ini. Burniva sangat menyarankan pemulihan mental, pengurangan tekanan akademik, dan waktu istirahat yang cukup.";
+
+  // Fallback
+  return `Kondisi burnout kamu terdeteksi di level ${burnoutLevel}. Perhatikan kesehatan mentalmu.`;
 };
 
 const getMood = (score) => {
@@ -23,18 +34,10 @@ const getMood = (score) => {
   return "Lelah";
 };
 
-const getStressLevel = (score) => {
-  if (!score) return "Belum ada";
-  if (score <= 20) return "Level 1";
-  if (score <= 40) return "Level 2";
-  if (score <= 60) return "Level 3";
-  if (score <= 80) return "Level 4";
-  return "Level 5";
-};
-
 function Dashboard() {
   const [dashboard, setDashboard] = useState(null);
   const [todos, setTodos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const user = useAuthStore(s => s.user);
 
   useEffect(() => {
@@ -50,8 +53,14 @@ function Dashboard() {
       setTodos(todosData);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) {
+    return <LoadingScreen text="Memuat dashboard..." />
+  }
 
   const doneTodos = todos.filter(t => t.status === 'completed').length;
   const totalTodos = todos.length;
@@ -73,25 +82,38 @@ function Dashboard() {
       icon: <Smile size={18} className="text-emerald-500" />,
       iconBg: 'bg-emerald-500/10 shadow-sm',
       label: 'Mood Harian',
-      value: getMood(dashboard?.latest?.burnout_score),
+      value: dashboard?.latestPrediction?.mood_today || getMood(dashboard?.latest?.burnout_score),
     },
     {
       icon: <Activity size={18} className="text-red-500" />,
       iconBg: 'bg-red-500/10 shadow-sm',
       label: 'Level Stres',
-      value: getStressLevel(dashboard?.latest?.burnout_score),
+      value: dashboard?.latest?.stress ? `${dashboard.latest.stress}/10` : 'Belum ada',
     },
   ];
+
+  // Cek apakah data terbaru adalah hari ini
+  const hasTodayData = Boolean(
+    dashboard?.latest?.createdAt && 
+    new Date(dashboard.latest.createdAt).toLocaleDateString() === new Date().toLocaleDateString()
+  );
+
+  // Level Stres & Mood (tetap pertahankan jika diperlukan di summary cards, atau pakai data riil)
+  // Untuk saat ini kita pertahankan agar tidak error.
 
   return (
     <div className="flex flex-col gap-6 p-6 w-full max-w-[1200px] mx-auto bg-[#F8FAFC] min-h-screen">
       
       {/* Burnout Hero Card */}
       <BurnoutCard 
-        score={dashboard?.latest?.burnout_score || 0} 
-        levelStr={dashboard?.latest?.burnout_level || 'Belum ada'} 
-        insight={getInsight(dashboard?.latest?.burnout_score)}
+        burnoutPrediction={dashboard?.latestPrediction?.burnout_prediction} 
+        mentalHealthPrediction={dashboard?.latestPrediction?.mental_health_prediction} 
+        insight={getDynamicInsight(
+          dashboard?.latestPrediction?.burnout_prediction, 
+          dashboard?.latestPrediction?.mental_health_prediction
+        )}
         userName={user?.name}
+        hasTodayData={hasTodayData}
       />
 
       {/* REVISI: 4 Summary Cards (2 Kolom di HP, 4 Kolom di PC) */}
@@ -110,7 +132,13 @@ function Dashboard() {
 
         {/* Kanan — Insight + Todo */}
         <div className="flex flex-col gap-6">
-          <InsightCard />
+          <InsightCard 
+            insight={dashboard?.latestPrediction?.daily_insight || getDynamicInsight(
+              dashboard?.latestPrediction?.burnout_prediction, 
+              dashboard?.latestPrediction?.mental_health_prediction
+            )}
+            hasTodayData={hasTodayData}
+          />
           <TodoCard done={doneTodos} total={totalTodos} />
         </div>
       </div>
