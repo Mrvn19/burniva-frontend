@@ -2,6 +2,7 @@ import { MoreHorizontal, Activity } from 'lucide-react'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts'
+import Avatar from '../../ui/Avatar'
 
 function RecentActivities({ activityData = [], activities = [] }) {
     return (
@@ -11,7 +12,7 @@ function RecentActivities({ activityData = [], activities = [] }) {
             <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm lg:col-span-2">
                 <div className="mb-6">
                     <h3 className="text-base font-bold text-slate-800">Aktivitas Pengguna</h3>
-                    <p className="text-sm text-slate-500">Pengguna aktif mingguan</p>
+                    <p className="text-sm text-slate-500">Dalam 7 hari terakhir</p>
                 </div>
                 
                 <div className="h-[250px] w-full">
@@ -55,9 +56,12 @@ function RecentActivities({ activityData = [], activities = [] }) {
                     ) : (
                         activities.map((act) => (
                             <div key={act.id} className="flex items-start gap-3">
-                                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-semibold ${act.color} flex-shrink-0 mt-0.5`}>
-                                    {act.initial}
-                                </div>
+                                <Avatar 
+                                    src={act.photoUrl} 
+                                    name={act.name} 
+                                    size="sm" 
+                                    className="w-9 h-9 text-sm flex-shrink-0 mt-0.5 shadow-sm"
+                                />
                                 <div>
                                     <p className="text-sm text-slate-700 leading-snug">
                                         <span className="font-bold text-slate-900">{act.name}</span> {act.action}

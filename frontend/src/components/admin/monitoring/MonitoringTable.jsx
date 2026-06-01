@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { classNames } from '../../../utils/helpers'
+import PenggunaPagination from '../pengguna/PenggunaPagination'
 
 function MonitoringTable({ data = [], activePeriod = 'mingguan', onPeriodChange }) {
     const periods = [
@@ -21,6 +22,19 @@ function MonitoringTable({ data = [], activePeriod = 'mingguan', onPeriodChange 
                 return 'bg-slate-50 text-slate-600 border-slate-100'
         }
     }
+
+    const [currentPage, setCurrentPage] = useState(1)
+    const itemsPerPage = 10
+
+    // Reset halaman ke 1 setiap kali periode atau data berubah
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [activePeriod, data])
+
+    const paginatedData = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage
+        return data.slice(startIndex, startIndex + itemsPerPage)
+    }, [data, currentPage, itemsPerPage])
 
     return (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
@@ -72,7 +86,7 @@ function MonitoringTable({ data = [], activePeriod = 'mingguan', onPeriodChange 
                                 </td>
                             </tr>
                         ) : (
-                            data.map((row, index) => (
+                            paginatedData.map((row, index) => (
                                 <tr 
                                     key={row.id || index} 
                                     className="hover:bg-slate-50/50 transition-colors duration-150 text-sm"
@@ -100,6 +114,14 @@ function MonitoringTable({ data = [], activePeriod = 'mingguan', onPeriodChange 
                     </tbody>
                 </table>
             </div>
+
+            <PenggunaPagination 
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                totalItems={data.length}
+                itemsPerPage={itemsPerPage}
+                itemLabel="assessment"
+            />
         </div>
     )
 }

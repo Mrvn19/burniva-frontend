@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-function PenggunaPagination({ currentPage, setCurrentPage, totalItems, itemsPerPage }) {
+function PenggunaPagination({ currentPage, setCurrentPage, totalItems, itemsPerPage, itemLabel = 'pengguna' }) {
     const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
     const startIndex = (currentPage - 1) * itemsPerPage + 1;
     const endIndex = Math.min(currentPage * itemsPerPage, totalItems);
@@ -9,8 +9,8 @@ function PenggunaPagination({ currentPage, setCurrentPage, totalItems, itemsPerP
         <div className="p-5 md:p-6 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-slate-500">
             <p className="text-slate-400 font-medium">
                 {totalItems > 0 
-                    ? `Menampilkan ${startIndex} - ${endIndex} dari ${totalItems} pengguna` 
-                    : 'Tidak ada data pengguna'}
+                    ? `Menampilkan ${startIndex} - ${endIndex} dari ${totalItems} ${itemLabel}` 
+                    : `Tidak ada data ${itemLabel}`}
             </p>
             <div className="flex items-center gap-3">
                 <button 

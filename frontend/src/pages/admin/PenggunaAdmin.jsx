@@ -8,6 +8,7 @@ import adminService from '../../services/admin/adminService'
 
 function PenggunaAdmin() {
     const [users, setUsers] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
 
     // States untuk filter & pencarian
     const [searchTerm, setSearchTerm] = useState('')
@@ -22,6 +23,7 @@ function PenggunaAdmin() {
     const itemsPerPage = 6 // Diubah menjadi 6 agar pas dengan mockup "Menampilkan 6 dari 8 pengguna"
 
     const fetchUsers = async () => {
+        setIsLoading(true)
         try {
             const data = await adminService.getAllUsers()
             // Map data dari API agar sesuai dengan props tabel
@@ -41,6 +43,8 @@ function PenggunaAdmin() {
             setUsers(formatted)
         } catch (error) {
             console.error("Gagal mengambil data pengguna", error)
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -51,15 +55,18 @@ function PenggunaAdmin() {
     // Fungsi suspend user
     const toggleSuspend = async (id) => {
         try {
+            setIsLoading(true);
             await adminService.suspendUser(id)
-            fetchUsers() // Refresh data
+            await fetchUsers() // Refresh data (AWAIT added)
             
             if (selectedUser && selectedUser.id === id) {
-                setSelectedUser(prev => ({ ...prev, isSuspended: !prev.isSuspended }))
+                setSelectedUser(prev => prev ? { ...prev, isSuspended: !prev.isSuspended } : null)
             }
         } catch (error) {
             console.error("Gagal mengubah status suspend", error)
             alert("Gagal mengubah status suspend")
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -67,8 +74,9 @@ function PenggunaAdmin() {
     const deleteUser = async (id) => {
         if (window.confirm('Yakin ingin menghapus pengguna ini? Semua data terkait (Todo, History) juga akan terhapus secara permanen.')) {
             try {
+                setIsLoading(true);
                 await adminService.deleteUser(id)
-                fetchUsers() // Refresh data
+                await fetchUsers() // Refresh data (AWAIT added)
                 setCurrentPage(1)
                 if (selectedUser && selectedUser.id === id) {
                     setSelectedUser(null)
@@ -76,6 +84,8 @@ function PenggunaAdmin() {
             } catch (error) {
                 console.error("Gagal menghapus pengguna", error)
                 alert("Gagal menghapus pengguna")
+            } finally {
+                setIsLoading(false);
             }
         }
     }
@@ -103,6 +113,12 @@ function PenggunaAdmin() {
         setCurrentPage(1)
     }, [searchTerm, filterUniv, filterRisk])
 
+    // Mengambil daftar universitas unik dari data pengguna
+    const univOptions = useMemo(() => {
+        const uniqueUnivs = new Set(users.map(u => u.univ).filter(u => u && u !== '-'))
+        return Array.from(uniqueUnivs).sort()
+    }, [users])
+
 
     return (
         <div className="p-4 md:p-8 max-w-[1400px] mx-auto space-y-6">
@@ -118,11 +134,13 @@ function PenggunaAdmin() {
                     setFilterUniv={setFilterUniv}
                     filterRisk={filterRisk}
                     setFilterRisk={setFilterRisk}
+                    univOptions={univOptions}
                 />
 
                 {/* Tabel Data */}
                 <PenggunaTable
                     users={paginatedUsers}
+                    isLoading={isLoading}
                     toggleSuspend={toggleSuspend}
                     deleteUser={deleteUser}
                     onViewDetail={setSelectedUser}

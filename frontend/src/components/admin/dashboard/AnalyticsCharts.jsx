@@ -20,16 +20,9 @@ function AnalyticsCharts({ trendData = [], distributionData = [] }) {
                     </div>
                     <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-100">
                         <button
-                            onClick={() => setTrendPeriod('Mingguan')}
-                            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${trendPeriod === 'Mingguan' ? 'bg-white text-primary-500 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors bg-white text-primary-500 shadow-sm border border-slate-200 cursor-default`}
                         >
-                            Mingguan
-                        </button>
-                        <button
-                            onClick={() => setTrendPeriod('Bulanan')}
-                            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${trendPeriod === 'Bulanan' ? 'bg-white text-primary-500 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
-                        >
-                            Bulanan
+                            7 Hari Terakhir
                         </button>
                     </div>
                 </div>

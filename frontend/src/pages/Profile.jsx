@@ -76,10 +76,11 @@ function Profile() {
     setSecurityErrorMsg('');
 
     // Validasi kosong data pribadi
-    if (!form.nama || !form.email || !form.universitas || !form.prodi || form.semester === '' || form.semester === null) {
-      setPersonalErrorMsg("Nama, Email, Universitas, Program Studi, dan Semester wajib diisi.");
-      return;
-    }
+    if (!form.nama) { setPersonalErrorMsg("Nama wajib diisi."); return; }
+    if (!form.email) { setPersonalErrorMsg("Email wajib diisi."); return; }
+    if (!form.universitas) { setPersonalErrorMsg("Universitas wajib diisi."); return; }
+    if (!form.prodi) { setPersonalErrorMsg("Program Studi wajib diisi."); return; }
+    if (form.semester === '' || form.semester === null) { setPersonalErrorMsg("Semester wajib diisi."); return; }
 
     // Validasi Regex Email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

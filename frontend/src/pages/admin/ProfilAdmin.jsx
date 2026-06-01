@@ -12,16 +12,53 @@ function ProfilAdmin() {
     // States for inputs
     const [adminName, setAdminName] = useState(user?.name || 'Admin Burniva')
     const [email, setEmail] = useState(user?.email || 'admin@burniva.id')
-    const [profileImage, setProfileImage] = useState(user?.profileImage || null)
+    const [profileImage, setProfileImage] = useState(user?.profile_image || null)
 
     const [oldPassword, setOldPassword] = useState('')
     const [newPassword, setNewPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
 
+    // Error states
+    const [personalErrorMsg, setPersonalErrorMsg] = useState('')
+    const [securityErrorMsg, setSecurityErrorMsg] = useState('')
+
     const handleSave = async () => {
-        if (newPassword && newPassword !== confirmPassword) {
-            alert('Password baru dan konfirmasi password tidak cocok!')
+        setPersonalErrorMsg('')
+        setSecurityErrorMsg('')
+
+        // 1. Validasi Nama dan Email
+        if (!adminName || !adminName.trim()) {
+            setPersonalErrorMsg('Nama wajib diisi.')
             return
+        }
+        if (!email || !email.trim()) {
+            setPersonalErrorMsg('Email wajib diisi.')
+            return
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setPersonalErrorMsg('Format email tidak valid.')
+            return
+        }
+
+        // 2. Validasi Password (jika diisi salah satu)
+        if (newPassword || oldPassword || confirmPassword) {
+            if (!oldPassword) {
+                setSecurityErrorMsg('Password lama harus diisi jika ingin mengubah password.')
+                return
+            }
+            if (!newPassword) {
+                setSecurityErrorMsg('Password baru harus diisi.')
+                return
+            }
+            if (newPassword !== confirmPassword) {
+                setSecurityErrorMsg('Password baru dan konfirmasi password tidak cocok!')
+                return
+            }
+            if (newPassword.length < 6) {
+                setSecurityErrorMsg('Password baru minimal 6 karakter.')
+                return
+            }
         }
 
         try {
@@ -47,7 +84,14 @@ function ProfilAdmin() {
             setConfirmPassword('')
         } catch (error) {
             console.error("Gagal menyimpan profil", error)
-            alert(error.response?.data?.message || "Terjadi kesalahan saat menyimpan profil")
+            const errorMsg = error.response?.data?.message || "Terjadi kesalahan saat menyimpan profil"
+            
+            // Tentukan apakah error dari password lama salah (keamanan) atau error umum
+            if (error.response?.status === 400 && errorMsg.toLowerCase().includes('sandi lama')) {
+                setSecurityErrorMsg(errorMsg)
+            } else {
+                setPersonalErrorMsg(errorMsg)
+            }
         }
     }
 
@@ -72,6 +116,7 @@ function ProfilAdmin() {
                         email={email}
                         onChangeName={setAdminName}
                         onChangeEmail={setEmail}
+                        errorMsg={personalErrorMsg}
                     />
                     
                     <ProfileSecurityCard 
@@ -81,6 +126,7 @@ function ProfilAdmin() {
                         onChangeOld={setOldPassword}
                         onChangeNew={setNewPassword}
                         onChangeConfirm={setConfirmPassword}
+                        errorMsg={securityErrorMsg}
                     />
 
                     <div className="flex justify-end">

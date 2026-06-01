@@ -53,8 +53,8 @@ function ProfileEdit({
         )}
 
         <div className="flex flex-col gap-5">
-          <Input label="Nama Lengkap *" name="nama" value={form.nama} onChange={onUserChange} placeholder="Nama Lengkap" required />
-          <Input label="Email *" name="email" type="email" value={form.email} onChange={onUserChange} placeholder="kamu@kampus.ac.id" required />
+          <Input label="Nama Lengkap" name="nama" value={form.nama} onChange={onUserChange} placeholder="Nama Lengkap" required />
+          <Input label="Email" name="email" type="email" value={form.email} onChange={onUserChange} placeholder="kamu@kampus.ac.id" required />
 
           {/* Jenis Kelamin */}
           <div className="flex flex-col gap-1.5">
@@ -75,13 +75,13 @@ function ProfileEdit({
           <Input label="Umur" name="umur" type="number" value={form.umur} onChange={onUserChange} placeholder="Contoh: 21" min={0} />
 
           {/* Universitas */}
-          <Input label="Universitas *" name="universitas" value={form.universitas} onChange={onUserChange} placeholder="Nama Universitas" required />
+          <Input label="Universitas" name="universitas" value={form.universitas} onChange={onUserChange} placeholder="Nama Universitas" required />
 
           {/* Program Studi */}
-          <Input label="Program Studi *" name="prodi" value={form.prodi} onChange={onUserChange} placeholder="Program Studi / Jurusan" required />
+          <Input label="Program Studi" name="prodi" value={form.prodi} onChange={onUserChange} placeholder="Program Studi / Jurusan" required />
 
           {/* Semester */}
-          <Input label="Semester *" name="semester" type="number" value={form.semester} onChange={onUserChange} placeholder="Contoh: 6" min={0} required />
+          <Input label="Semester" name="semester" type="number" value={form.semester} onChange={onUserChange} placeholder="Contoh: 6" min={0} required />
 
           {/* AREA EDIT FOTO */}
           <div className="flex flex-col gap-2 mt-1">

@@ -173,14 +173,14 @@ function UserDetailModal({ user, onClose, onToggleSuspend, onDelete }) {
                     <div className="flex gap-2 w-full sm:w-auto">
                         {user.isSuspended ? (
                             <button
-                                onClick={() => { onToggleSuspend(user.id); onClose(); }}
+                                onClick={() => { onToggleSuspend(user.id); }}
                                 className="flex-1 sm:flex-initial h-10 px-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-600 text-sm font-semibold hover:bg-emerald-100 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                             >
                                 <Unlock size={14} /> Aktifkan User
                             </button>
                         ) : (
                             <button
-                                onClick={() => { onToggleSuspend(user.id); onClose(); }}
+                                onClick={() => { onToggleSuspend(user.id); }}
                                 className="flex-1 sm:flex-initial h-10 px-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-600 text-sm font-semibold hover:bg-amber-100 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                             >
                                 <Ban size={14} /> Suspend User

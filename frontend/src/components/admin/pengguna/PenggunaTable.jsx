@@ -10,7 +10,7 @@ const getRiskBadgeColor = (risk) => {
     }
 }
 
-function PenggunaTable({ users, toggleSuspend, deleteUser, onViewDetail }) {
+function PenggunaTable({ users, isLoading, toggleSuspend, deleteUser, onViewDetail }) {
     return (
         <div className="overflow-x-auto lg:overflow-visible w-full">
             <table className="w-full text-left text-xs md:text-sm table-auto border-collapse min-w-[900px] lg:min-w-0">
@@ -27,7 +27,13 @@ function PenggunaTable({ users, toggleSuspend, deleteUser, onViewDetail }) {
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700">
-                    {users.length === 0 ? (
+                    {isLoading ? (
+                        <tr>
+                            <td colSpan="8" className="px-4 py-12 text-center text-slate-400 font-medium">
+                                Sedang memuat data pengguna...
+                            </td>
+                        </tr>
+                    ) : users.length === 0 ? (
                         <tr>
                             <td colSpan="8" className="px-4 py-12 text-center text-slate-400">
                                 Tidak ada data pengguna yang ditemukan.

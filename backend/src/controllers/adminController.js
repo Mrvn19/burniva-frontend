@@ -57,7 +57,7 @@ const getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll({
       where: { role: 'user' },
-      attributes: ['id', 'name', 'email', 'university', 'major', 'is_suspended', 'createdAt'],
+      attributes: ['id', 'name', 'email', 'university', 'major', 'semester', 'is_suspended', 'createdAt'],
       order: [['createdAt', 'DESC']]
     });
 
@@ -143,13 +143,27 @@ const deleteUser = async (req, res) => {
 // GET MONITORING DATA (MOCK FOR NOW, BISA DIKEMBANGKAN LEBIH LANJUT)
 const getMonitoringData = async (req, res) => {
   try {
+    const { Op } = require('sequelize');
     const { period } = req.query; // 'hari_ini', 'mingguan', 'bulanan'
     
-    // Mock simple query, get 50 last inputs
+    let dateFilter = {};
+    const now = new Date();
+    
+    if (period === 'hari_ini') {
+      const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+      dateFilter = { createdAt: { [Op.gte]: startOfDay } };
+    } else if (period === 'mingguan') {
+      const lastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      dateFilter = { createdAt: { [Op.gte]: lastWeek } };
+    } else if (period === 'bulanan') {
+      const lastMonth = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      dateFilter = { createdAt: { [Op.gte]: lastMonth } };
+    }
+
     const inputs = await DailyInput.findAll({
+      where: dateFilter,
       include: [{ model: User, attributes: ['name', 'email'] }],
-      order: [['createdAt', 'DESC']],
-      limit: 50
+      order: [['createdAt', 'DESC']]
     });
 
     const formatted = inputs.map(input => ({
@@ -335,7 +349,7 @@ const getAnalyticsData = async (req, res) => {
 const getRecentActivities = async (req, res) => {
   try {
     const recentInputs = await DailyInput.findAll({
-      include: [{ model: User, attributes: ['name'] }],
+      include: [{ model: User, attributes: ['name', 'profile_image'] }],
       order: [['createdAt', 'DESC']],
       limit: 5
     });
@@ -346,6 +360,7 @@ const getRecentActivities = async (req, res) => {
       action: 'menyelesaikan assessment',
       time: input.createdAt.toISOString(),
       initial: (input.User?.name || 'U').charAt(0).toUpperCase(),
+      photoUrl: input.User?.profile_image || null,
       color: 'bg-primary-500'
     }));
 
