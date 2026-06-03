@@ -26,4 +26,6 @@ export const ROUTES = {
   HISTORY:        '/riwayat',
   HISTORY_DETAIL: '/riwayat/:id', // <-- Rute dinamis baru untuk detail riwayat harian
   PROFILE:        '/profil',
+  TEAM:           '/team',
+  ABOUT:          '/tentang',
 }

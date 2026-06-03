@@ -1,4 +1,3 @@
-
 import { Heart } from 'lucide-react'
 import Logo from '../common/Logo'
 import { Link } from 'react-router-dom'
@@ -26,11 +25,11 @@ const LinktreeIcon = () => (
   </svg>
 )
 
-function Footer() {
+function AboutFooter() {
   return (
     <footer className="bg-slate-950 pt-20 pb-10 border-t border-slate-900 overflow-hidden relative">
       {/* Subtle Glow Effect for Background */}
-      <div className="absolute top-0 left-1/4 w-1/2 h-40 bg-primary-900/20 blur-[120px] pointer-events-none"></div>
+      <div className="absolute top-0 left-1/4 w-1/2 h-40 bg-emerald-900/20 blur-[120px] pointer-events-none"></div>
 
       <div className="w-full px-6 sm:px-10 md:px-16 lg:px-24 relative z-10">
         {/* Main Footer Content */}
@@ -69,7 +68,7 @@ function Footer() {
             <h4 className="text-sm font-semibold text-white mb-6 tracking-wide">Produk</h4>
             <div className="flex flex-col gap-4">
               {['Dashboard', 'Cek Harian', 'To-Do AI', 'Riwayat'].map((item) => (
-                <Link key={item} to={ROUTES.LOGIN} className="text-sm text-slate-400 hover:text-primary-400 hover:translate-x-1 transition-all inline-block w-fit">
+                <Link key={item} to={ROUTES.LOGIN} className="text-sm text-slate-400 hover:text-emerald-400 hover:translate-x-1 transition-all inline-block w-fit">
                   {item}
                 </Link>
               ))}
@@ -80,16 +79,16 @@ function Footer() {
             <h4 className="text-sm font-semibold text-white mb-6 tracking-wide">Capstone</h4>
             <div className="flex flex-col gap-4">
               {[
-                { label: 'Tentang Kami', href: ROUTES.ABOUT },
+                { label: 'Beranda', href: ROUTES.HOME },
                 { label: 'Tim', href: ROUTES.TEAM },
                 { label: 'Kontak', href: 'mailto:hafiznaufal27lp@gmail.com', external: true }
               ].map((item) => (
                 item.external ? (
-                  <a key={item.label} href={item.href} className="text-sm text-slate-400 hover:text-primary-400 hover:translate-x-1 transition-all inline-block w-fit">
+                  <a key={item.label} href={item.href} className="text-sm text-slate-400 hover:text-emerald-400 hover:translate-x-1 transition-all inline-block w-fit">
                     {item.label}
                   </a>
                 ) : (
-                  <Link key={item.label} to={item.href} className="text-sm text-slate-400 hover:text-primary-400 hover:translate-x-1 transition-all inline-block w-fit">
+                  <Link key={item.label} to={item.href} className="text-sm text-slate-400 hover:text-emerald-400 hover:translate-x-1 transition-all inline-block w-fit">
                     {item.label}
                   </Link>
                 )
@@ -105,7 +104,7 @@ function Footer() {
                 { label: 'Blog', href: 'https://naufaltech27.blogspot.com/2026/06/ketika-tekanan-kuliah-menjadi-terlalu.html' },
                 { label: 'Bantuan', href: 'https://youtu.be/7eNydMQqC0w' }
               ].map((item) => (
-                <a key={item.label} href={item.href} target={['Blog', 'Bantuan'].includes(item.label) ? '_blank' : '_self'} rel="noopener noreferrer" className="text-sm text-slate-400 hover:text-primary-400 hover:translate-x-1 transition-all inline-block w-fit">
+                <a key={item.label} href={item.href} target={['Blog', 'Bantuan'].includes(item.label) ? '_blank' : '_self'} rel="noopener noreferrer" className="text-sm text-slate-400 hover:text-emerald-400 hover:translate-x-1 transition-all inline-block w-fit">
                   {item.label}
                 </a>
               ))}
@@ -113,16 +112,16 @@ function Footer() {
           </div>
 
           <div className="col-span-1 lg:col-span-2">
-            <h4 className="text-sm font-semibold text-white mb-6 tracking-wide">Informasi</h4>
+            <h4 className="text-sm font-semibold text-white mb-6 tracking-wide">Tentang</h4>
             <div className="flex flex-col gap-4">
               {[
-                { label: 'Beranda', href: '#beranda' },
-                { label: 'Fitur', href: '#fitur' },
-                { label: 'Cara Kerja', href: '#cara-kerja' },
-                { label: 'Demo User', href: '#demo' },
-                { label: 'FAQ', href: '#faq' }
+                { label: 'Cerita Burniva', href: '#cerita' },
+                { label: 'Apa Itu Burniva', href: '#apa-itu' },
+                { label: 'Filosofi', href: '#filosofi' },
+                { label: 'Nilai-Nilai', href: '#nilai' },
+                { label: 'Perjalanan', href: '#perjalanan' }
               ].map((item) => (
-                <a key={item.label} href={item.href} className="text-sm text-slate-400 hover:text-primary-400 hover:translate-x-1 transition-all inline-block w-fit">
+                <a key={item.label} href={item.href} className="text-sm text-slate-400 hover:text-emerald-400 hover:translate-x-1 transition-all inline-block w-fit">
                   {item.label}
                 </a>
               ))}
@@ -144,4 +143,4 @@ function Footer() {
   )
 }
 
-export default Footer
+export default AboutFooter

@@ -27,6 +27,15 @@ export const getTodayString = () => {
   })
 }
 
+export const isToday = (dateString) => {
+  if (!dateString) return false;
+  const d = new Date(dateString);
+  const today = new Date();
+  return d.getDate() === today.getDate() &&
+         d.getMonth() === today.getMonth() &&
+         d.getFullYear() === today.getFullYear();
+}
+
 export const classNames = (...classes) => {
   return classes.filter(Boolean).join(' ')
 }

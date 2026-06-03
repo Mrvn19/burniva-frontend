@@ -12,6 +12,7 @@ import { createAssessment } from '../services/assessmentService'
 import { getDashboard } from '../services/dashboardService'
 import { motion } from 'framer-motion'
 import useAuthStore from '../store/auth/useAuthStore'
+import { isToday } from '../utils/helpers'
 
 function Input() {
   const navigate = useNavigate()
@@ -50,10 +51,7 @@ function Input() {
 
         const data = await getDashboard();
         if (data?.latest?.createdAt) {
-          const latestDate = new Date(data.latest.createdAt).toLocaleDateString();
-          const todayDate = new Date().toLocaleDateString();
-
-          if (latestDate === todayDate) {
+          if (isToday(data.latest.createdAt)) {
             setIsLocked(true);
             return;
           }

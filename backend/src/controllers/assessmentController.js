@@ -32,15 +32,24 @@ const createAssessment =
 
       const { Op } = require('sequelize');
 
-      // 0. Cegah Input Ganda di Hari yang Sama
-      const startOfDay = new Date();
-      startOfDay.setHours(0, 0, 0, 0);
+      // 0. Cegah Input Ganda di Hari yang Sama (Berdasarkan Waktu Jakarta / WIB)
+      const now = new Date();
+      const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Jakarta',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+      const todayStr = formatter.format(now); // "YYYY-MM-DD"
+      
+      const startOfDay = new Date(`${todayStr}T00:00:00+07:00`);
+      const endOfDay = new Date(`${todayStr}T23:59:59.999+07:00`);
 
       const existingAssessment = await DailyInput.findOne({
         where: {
           user_id: userId,
           createdAt: {
-            [Op.gte]: startOfDay,
+            [Op.between]: [startOfDay, endOfDay],
           },
         },
       });
@@ -53,7 +62,9 @@ const createAssessment =
       }
 
       // Kalkulasi skor mentah (Maksimum 70)
-      const rawScore = stress + anxiety + emotional_pressure + academic_pressure + financial_pressure + family_expectation + (10 - social_support);
+      const num = (val) => Number(val) || 0;
+
+      const rawScore = num(stress) + num(anxiety) + num(emotional_pressure) + num(academic_pressure) + num(financial_pressure) + num(family_expectation) + (10 - num(social_support));
       
       // Konversi ke persentase 0-100% untuk UI
       const totalScore = Math.round((rawScore / 70) * 100);
@@ -200,10 +211,17 @@ const resetTodayAssessment = async (req, res) => {
     const { DailyInput, Prediction, Todo } = require("../models");
     const userId = req.user.id;
 
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999);
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Jakarta',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    const todayStr = formatter.format(now);
+    
+    const startOfDay = new Date(`${todayStr}T00:00:00+07:00`);
+    const endOfDay = new Date(`${todayStr}T23:59:59.999+07:00`);
 
     // Cari DailyInput hari ini milik user
     const dailyInput = await DailyInput.findOne({

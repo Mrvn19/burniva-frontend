@@ -7,6 +7,7 @@ import AdminRoute from './AdminRoute'
 
 // PASTIKAN IMPOR SEPERTI INI (Tanpa tanda kurung kurawal {})
 import ScrollToTop from '../components/common/ScrollToTop'
+import { useAuthCheck } from '../hooks/useAuthCheck'
 
 import Landing from '../pages/Landing'
 import Login from '../pages/Login'
@@ -28,14 +29,25 @@ import MonitoringAdmin from '../pages/admin/MonitoringAdmin'
 import AnalitikAdmin from '../pages/admin/AnalitikAdmin'
 import ProfilAdmin from '../pages/admin/ProfilAdmin'
 
+import TeamIdentityPage from '../pages/TeamIdentityPage'
+import AboutBurnivaPage from '../pages/AboutBurnivaPage'
+
+function AuthChecker() {
+  useAuthCheck();
+  return null;
+}
+
 function AppRoutes() {
   return (
     <BrowserRouter>
       {/* Komponen diletakkan di sini, tepat di dalam BrowserRouter */}
       <ScrollToTop />
+      <AuthChecker />
 
       <Routes>
         <Route path={ROUTES.HOME} element={<Landing />} />
+        <Route path={ROUTES.TEAM} element={<TeamIdentityPage />} />
+        <Route path={ROUTES.ABOUT} element={<AboutBurnivaPage />} />
 
         <Route element={<PublicRoute />}>
           <Route path={ROUTES.LOGIN} element={<Login />} />

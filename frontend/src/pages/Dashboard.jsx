@@ -3,6 +3,7 @@ import { Moon, BookOpen, Smile, Activity } from 'lucide-react'
 import { getDashboard } from '../services/dashboardService'
 import { getTodos } from '../services/todoService'
 import useAuthStore from '../store/auth/useAuthStore'
+import { isToday } from '../utils/helpers'
 import BurnoutCard from '../components/dashboard/BurnoutCard'
 import SummaryCard from '../components/dashboard/SummaryCard'
 import ChartSection from '../components/dashboard/ChartSection'
@@ -94,8 +95,7 @@ function Dashboard() {
 
   // Cek apakah data terbaru adalah hari ini
   const hasTodayData = Boolean(
-    dashboard?.latest?.createdAt && 
-    new Date(dashboard.latest.createdAt).toLocaleDateString() === new Date().toLocaleDateString()
+    dashboard?.latest?.createdAt && isToday(dashboard.latest.createdAt)
   );
 
   // Level Stres & Mood (tetap pertahankan jika diperlukan di summary cards, atau pakai data riil)

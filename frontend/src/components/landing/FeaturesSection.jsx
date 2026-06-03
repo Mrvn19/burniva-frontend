@@ -15,7 +15,7 @@ function FeaturesSection() {
     <section id="fitur" className="py-14 md:py-24 bg-white relative overflow-hidden">
       <div className="w-full px-4 md:px-16 lg:px-24 relative z-10">
 
-        <div className="text-left mb-12 md:mb-16 max-w-3xl">
+        <div className="text-center mb-12 md:mb-16 max-w-3xl mx-auto">
           <p className="inline-block bg-primary-100 text-primary-600 text-xs md:text-sm font-medium px-3 py-1 rounded-full mb-4">
             Fitur
           </p>

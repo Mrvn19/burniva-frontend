@@ -6,11 +6,18 @@ const getStats = async (req, res) => {
   try {
     const totalUsers = await User.count({ where: { role: 'user' } });
     
-    // Asumsi pengguna aktif = ada DailyInput hari ini
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999);
+    // Asumsi pengguna aktif = ada DailyInput hari ini (Berdasarkan WIB)
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Jakarta',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    const todayStr = formatter.format(now);
+    
+    const startOfDay = new Date(`${todayStr}T00:00:00+07:00`);
+    const endOfDay = new Date(`${todayStr}T23:59:59.999+07:00`);
     
     const activeToday = await DailyInput.count({
       distinct: true,
@@ -128,10 +135,17 @@ const resetDailyInput = async (req, res) => {
     const { Op } = require("sequelize");
     const userId = req.params.id;
 
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999);
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Jakarta',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    const todayStr = formatter.format(now);
+    
+    const startOfDay = new Date(`${todayStr}T00:00:00+07:00`);
+    const endOfDay = new Date(`${todayStr}T23:59:59.999+07:00`);
 
     // Cari DailyInput hari ini
     const dailyInput = await DailyInput.findOne({
@@ -200,8 +214,16 @@ const getMonitoringData = async (req, res) => {
     let dateFilter = {};
     const now = new Date();
     
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Jakarta',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    const todayStr = formatter.format(now);
+    
     if (period === 'hari_ini') {
-      const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+      const startOfDay = new Date(`${todayStr}T00:00:00+07:00`);
       dateFilter = { createdAt: { [Op.gte]: startOfDay } };
     } else if (period === 'mingguan') {
       const lastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -250,20 +272,29 @@ const getAnalyticsData = async (req, res) => {
     if (prodi) userWhere.major = prodi;
 
     const today = new Date();
+    
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Jakarta',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    
     // 7 Hari Terakhir
     const dates = Array.from({ length: 7 }).map((_, i) => {
       const d = new Date(today);
       d.setDate(today.getDate() - (6 - i));
-      d.setHours(0, 0, 0, 0);
-      return d;
+      const dateStr = formatter.format(d);
+      return new Date(`${dateStr}T00:00:00+07:00`);
     });
 
     const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 
     // Ambil semua data 7 hari terakhir
     const startDate = dates[0];
-    const endDate = new Date(today);
-    endDate.setHours(23, 59, 59, 999);
+    
+    const todayStr = formatter.format(today);
+    const endDate = new Date(`${todayStr}T23:59:59.999+07:00`);
 
     let dateWhere = {
       createdAt: {

@@ -44,10 +44,17 @@ const getHistoryById = async (req, res) => {
     }
 
     // Ambil Todo yang dibuat pada hari yang sama dengan history ini
-    const startOfDay = new Date(history.createdAt);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(history.createdAt);
-    endOfDay.setHours(23, 59, 59, 999);
+    const historyDate = new Date(history.createdAt);
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Jakarta',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    const todayStr = formatter.format(historyDate);
+    
+    const startOfDay = new Date(`${todayStr}T00:00:00+07:00`);
+    const endOfDay = new Date(`${todayStr}T23:59:59.999+07:00`);
 
     const todos = await Todo.findAll({
       where: {

@@ -20,7 +20,12 @@ const getTodos = async (req, res) => {
 
 const toggleTodo = async (req,res) => {
   try {
-    const todo = await Todo.findByPk(req.params.id);
+    const todo = await Todo.findOne({
+      where: {
+        id: req.params.id,
+        user_id: req.user.id
+      }
+    });
     if(!todo) {
       return res.status(404).json({
         message: "Todo tidak ditemukan"
