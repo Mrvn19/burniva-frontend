@@ -1,4 +1,5 @@
 import React from 'react'
+import CustomDropdown from '../../ui/CustomDropdown'
 
 function FilterGlobal({ 
     selectedPeriod = 'Semua Periode', 
@@ -17,60 +18,43 @@ function FilterGlobal({
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Filter Tanggal */}
-                <div className="relative">
-                    <select 
-                        value={selectedPeriod}
-                        onChange={(e) => setSelectedPeriod && setSelectedPeriod(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 appearance-none cursor-pointer"
-                    >
-                        <option value="01 Mei - 20 Mei 2026">01 Mei - 20 Mei 2026</option>
-                        <option value="21 Mei - 31 Mei 2026">21 Mei - 31 Mei 2026</option>
-                        <option value="Semua Periode">Semua Periode</option>
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </div>
-                </div>
+                <CustomDropdown
+                    name="period"
+                    value={selectedPeriod}
+                    onChange={(e) => setSelectedPeriod && setSelectedPeriod(e.target.value)}
+                    options={[
+                        { label: '01 Mei - 20 Mei 2026', value: '01 Mei - 20 Mei 2026' },
+                        { label: '21 Mei - 31 Mei 2026', value: '21 Mei - 31 Mei 2026' },
+                        { label: 'Semua Periode', value: 'Semua Periode' },
+                    ]}
+                    placeholder="Pilih Periode"
+                />
 
                 {/* Filter Universitas */}
-                <div className="relative">
-                    <select 
-                        value={selectedUniv}
-                        onChange={(e) => setSelectedUniv && setSelectedUniv(e.target.value)}
-                        className={`w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 appearance-none cursor-pointer ${selectedUniv ? 'text-slate-700' : 'text-slate-400'}`}
-                    >
-                        <option value="">Semua Universitas</option>
-                        {univOptions.map((univ, index) => (
-                            <option key={index} value={univ}>{univ}</option>
-                        ))}
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </div>
-                </div>
+                <CustomDropdown
+                    name="univ"
+                    value={selectedUniv}
+                    onChange={(e) => setSelectedUniv && setSelectedUniv(e.target.value)}
+                    options={[
+                        { label: 'Semua Universitas', value: '' },
+                        ...univOptions.map(u => ({ label: u, value: u }))
+                    ]}
+                    placeholder="Semua Universitas"
+                    searchable={true}
+                />
 
                 {/* Filter Program Studi */}
-                <div className="relative">
-                    <select 
-                        value={selectedProdi}
-                        onChange={(e) => setSelectedProdi && setSelectedProdi(e.target.value)}
-                        className={`w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 appearance-none cursor-pointer ${selectedProdi ? 'text-slate-700' : 'text-slate-400'}`}
-                    >
-                        <option value="">Semua Program Studi</option>
-                        {prodiOptions.map((prodi, index) => (
-                            <option key={index} value={prodi}>{prodi}</option>
-                        ))}
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </div>
-                </div>
+                <CustomDropdown
+                    name="prodi"
+                    value={selectedProdi}
+                    onChange={(e) => setSelectedProdi && setSelectedProdi(e.target.value)}
+                    options={[
+                        { label: 'Semua Program Studi', value: '' },
+                        ...prodiOptions.map(p => ({ label: p, value: p }))
+                    ]}
+                    placeholder="Semua Program Studi"
+                    searchable={true}
+                />
             </div>
 
             <div className="flex justify-end pt-2">

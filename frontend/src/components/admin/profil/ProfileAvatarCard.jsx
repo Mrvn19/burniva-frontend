@@ -1,9 +1,18 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { Camera, Pencil, Trash2 } from 'lucide-react'
 import Avatar from '../../ui/Avatar'
+import ConfirmationModal from '../../common/ConfirmationModal'
 
 function ProfileAvatarCard({ adminName = 'Admin Burniva', email = 'admin@burniva.id', profileImage = null, onImageChange }) {
     const fileInputRef = useRef(null)
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        confirmText: '',
+        variant: 'danger',
+        onConfirm: () => {}
+    })
 
     const handleCameraClick = () => {
         if (fileInputRef.current) {
@@ -51,9 +60,14 @@ function ProfileAvatarCard({ adminName = 'Admin Burniva', email = 'admin@burniva
                 {profileImage && (
                     <button 
                         onClick={() => {
-                            if (window.confirm('Hapus foto profil admin?')) {
-                                onImageChange(null);
-                            }
+                            setConfirmModal({
+                                isOpen: true,
+                                title: 'Hapus Foto Profil',
+                                message: 'Hapus foto profil admin?',
+                                confirmText: 'Ya, Hapus',
+                                variant: 'danger',
+                                onConfirm: () => onImageChange(null)
+                            });
                         }}
                         className="absolute -top-1 -right-1 w-9 h-9 bg-white border border-red-100 rounded-full flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 shadow-md transition-all z-10 cursor-pointer"
                     >
@@ -76,6 +90,11 @@ function ProfileAvatarCard({ adminName = 'Admin Burniva', email = 'admin@burniva
             <span className="mt-5 bg-primary-50 text-primary-700 border border-primary-100/70 rounded-full px-4 py-1.5 text-xs font-bold tracking-wide">
                 Admin
             </span>
+
+            <ConfirmationModal 
+                {...confirmModal}
+                onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+            />
         </div>
     )
 }

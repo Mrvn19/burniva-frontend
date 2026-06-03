@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import AdminSidebar from './AdminSidebar'
 import AdminTopbar from './AdminTopbar'
+import AdminBottomNav from './AdminBottomNav'
 
 // Kamu bisa menyesuaikan meta page admin di sini
 const adminPageMeta = {
@@ -27,6 +28,49 @@ function AdminLayout() {
         }
     }, [location.pathname]);
 
+    const [showTopbar, setShowTopbar] = useState(true);
+    const lastScrollY = useRef(0);
+
+    // EVENT LISTENER UNTUK SMART HEADER (HIDE-ON-SCROLL)
+    useEffect(() => {
+        const mainElement = document.getElementById('admin-main-content');
+        if (!mainElement) return;
+
+        const handleScroll = () => {
+            const currentScrollY = mainElement.scrollTop;
+            const maxScroll = mainElement.scrollHeight - mainElement.clientHeight;
+
+            // Cegah flickering karena 'bounce/overscroll' effect di bagian atas (iOS/Mac)
+            if (currentScrollY <= 0) {
+                setShowTopbar(true);
+                lastScrollY.current = currentScrollY;
+                return;
+            }
+
+            // Cegah flickering karena 'bounce/overscroll' effect di bagian paling bawah halaman
+            if (currentScrollY >= maxScroll - 1) {
+                return; 
+            }
+
+            // Beri sedikit toleransi (2px) agar getaran scroll minor tidak terus memicu state
+            if (Math.abs(currentScrollY - lastScrollY.current) < 2) return;
+            
+            // Jika scroll turun dan sudah melewati batas 50px
+            if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+                setShowTopbar(false);
+            } 
+            // Jika scroll naik
+            else if (currentScrollY < lastScrollY.current) {
+                setShowTopbar(true);
+            }
+            
+            lastScrollY.current = currentScrollY;
+        };
+
+        mainElement.addEventListener('scroll', handleScroll, { passive: true });
+        return () => mainElement.removeEventListener('scroll', handleScroll);
+    }, []);
+
     return (
         <div className="flex h-screen bg-slate-50 overflow-hidden">
             {/* Sidebar Admin */}
@@ -42,6 +86,7 @@ function AdminLayout() {
                     onToggleSidebar={() => setSidebarOpen(prev => !prev)}
                     title={meta.title}
                     subtitle={meta.subtitle}
+                    show={showTopbar}
                 />
 
                 {/* Konten Utama Admin */}
@@ -50,7 +95,8 @@ function AdminLayout() {
                 </main>
             </div>
 
-            {/* Catatan: Admin biasanya tidak pakai BottomNav di mobile, tapi jika butuh bisa ditambahkan */}
+            {/* Bottom Nav Admin Khusus Mobile */}
+            <AdminBottomNav />
         </div>
     )
 }

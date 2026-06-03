@@ -4,7 +4,7 @@ import MonitoringTable from '../../components/admin/monitoring/MonitoringTable'
 import adminService from '../../services/admin/adminService'
 
 function MonitoringAdmin() {
-    const [activePeriod, setActivePeriod] = useState('mingguan')
+    const [activePeriod, setActivePeriod] = useState('semua')
     const [activeData, setActiveData] = useState([])
     const [isDownloading, setIsDownloading] = useState(false)
 
@@ -23,9 +23,10 @@ function MonitoringAdmin() {
     // Hitung jumlah statistik secara dinamis berdasarkan data aktif
     const stats = useMemo(() => {
         return activeData.reduce((acc, curr) => {
-            if (curr.risk === 'Tinggi') acc.tinggi++
-            else if (curr.risk === 'Sedang') acc.sedang++
-            else if (curr.risk === 'Rendah') acc.rendah++
+            const risk = (curr.risk || '').toLowerCase()
+            if (risk === 'tinggi' || risk === 'high') acc.tinggi++
+            else if (risk === 'sedang' || risk === 'medium') acc.sedang++
+            else if (risk === 'rendah' || risk === 'low') acc.rendah++
             return acc
         }, { tinggi: 0, sedang: 0, rendah: 0 })
     }, [activeData])

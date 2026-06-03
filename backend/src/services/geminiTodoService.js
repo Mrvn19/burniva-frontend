@@ -1,8 +1,5 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Initialize Gemini API
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "dummy_key");
-
 /**
  * Fallback mapping based on Burnout Percentage (0-100)
  */
@@ -113,8 +110,9 @@ const generatePersonalizedTodos = async (burnoutPrediction, mentalHealthPredicti
       return { todos: getFallbackTodos(totalScore), source: 'fallback' };
     }
 
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
+      model: "gemini-flash-latest",
       generationConfig: {
         responseMimeType: "application/json"
       }
@@ -150,9 +148,9 @@ Skema JSON:
 ]
 `;
 
-    // Timeout protection (25 seconds for snappier fallback but giving Gemini enough time)
+    // Timeout protection (15 seconds to give Gemini enough time before falling back)
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Gemini API Timeout")), 25000)
+      setTimeout(() => reject(new Error("Gemini API Timeout")), 15000)
     );
 
     const result = await Promise.race([

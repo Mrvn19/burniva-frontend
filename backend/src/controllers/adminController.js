@@ -57,7 +57,7 @@ const getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll({
       where: { role: 'user' },
-      attributes: ['id', 'name', 'email', 'university', 'major', 'semester', 'is_suspended', 'createdAt'],
+      attributes: ['id', 'name', 'email', 'profile_image', 'university', 'major', 'semester', 'is_suspended', 'createdAt'],
       order: [['createdAt', 'DESC']]
     });
 
@@ -73,9 +73,11 @@ const getAllUsers = async (req, res) => {
 
       return {
         ...user.toJSON(),
+        last_burnout_score: lastInput?.burnout_score || null,
         last_burnout_prediction: lastInput?.Prediction?.burnout_prediction || lastInput?.burnout_level || 'Belum ada',
         last_mental_health_prediction: lastInput?.Prediction?.mental_health_prediction || 'N/A',
-        total_assessments: assessmentsCount
+        total_assessments: assessmentsCount,
+        last_assessment_date: lastInput ? lastInput.createdAt.toISOString().split('T')[0] : null
       };
     }));
 
@@ -218,13 +220,18 @@ const getMonitoringData = async (req, res) => {
       order: [['createdAt', 'DESC']]
     });
 
-    const formatted = inputs.map(input => ({
+    // Menghapus duplikasi baris jika terjadi anomali di database (misal: 1 input punya 2 prediksi)
+    const uniqueInputs = Array.from(new Map(inputs.map(item => [item.id, item])).values());
+
+    const formatted = uniqueInputs.map(input => ({
       id: input.id,
       name: input.User?.name || 'Unknown',
       mentalHealth: input.Prediction?.mental_health_prediction || 'N/A',
-      risk: input.Prediction?.burnout_prediction || input.burnout_level,
-      date: input.createdAt.toISOString().split('T')[0]
-    }));
+      risk: input.burnout_level,
+      burnoutScore: input.burnout_score,
+      date: input.createdAt.toISOString().split('T')[0],
+      createdAt: input.createdAt
+    })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     res.json(formatted);
   } catch (error) {
@@ -329,29 +336,63 @@ const getAnalyticsData = async (req, res) => {
 
     // --- DATA PERTUMBUHAN PENGGUNA (CUMULATIVE) ---
     const allUsers = await User.findAll({ where: { role: 'user' }, attributes: ['createdAt'] });
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    
+    const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const currentMonthIndex = new Date().getMonth();
+    const activeMonths = allMonths.slice(0, currentMonthIndex + 1);
+
     const growthMap = {};
-    months.forEach(m => growthMap[m] = 0);
+    activeMonths.forEach(m => growthMap[m] = 0);
+
     allUsers.forEach(u => {
-      const m = months[u.createdAt.getMonth()];
-      if (growthMap[m] !== undefined) growthMap[m]++;
+      const monthIdx = u.createdAt.getMonth();
+      if (monthIdx <= currentMonthIndex) {
+        const m = allMonths[monthIdx];
+        if (growthMap[m] !== undefined) growthMap[m]++;
+      }
     });
+    
     let cumulative = 0;
-    const userGrowthData = months.map(m => {
+    const userGrowthData = activeMonths.map(m => {
       cumulative += growthMap[m];
       return { name: m, value: cumulative };
     });
 
-    // --- DATA KORELASI TIDUR & BURNOUT ---
+    // --- DATA KORELASI TIDUR & BURNOUT (GROUPED) ---
     const sleepInputs = await DailyInput.findAll({
       where: dateWhere,
       include: includeUserOptions,
       attributes: ['sleep_hours', 'burnout_score']
     });
-    const sleepCorrelationData = sleepInputs.map(input => ({
-      xLabel: `${input.sleep_hours || 0}j`,
-      score: input.burnout_score
-    }));
+
+    const sleepGroups = {
+      '< 4 jam': { sum: 0, count: 0 },
+      '4–6 jam': { sum: 0, count: 0 },
+      '6–8 jam': { sum: 0, count: 0 },
+      '> 8 jam': { sum: 0, count: 0 }
+    };
+
+    sleepInputs.forEach(input => {
+      const h = Number(input.sleep_hours) || 0;
+      let label = '';
+      if (h < 4) label = '< 4 jam';
+      else if (h >= 4 && h <= 6) label = '4–6 jam';
+      else if (h > 6 && h <= 8) label = '6–8 jam';
+      else label = '> 8 jam';
+
+      sleepGroups[label].sum += input.burnout_score;
+      sleepGroups[label].count += 1;
+    });
+
+    const sleepCorrelationData = Object.keys(sleepGroups).map(label => {
+      const group = sleepGroups[label];
+      const averageScore = group.count > 0 ? Math.round(group.sum / group.count) : 0;
+      return {
+        label,
+        averageScore,
+        count: group.count
+      };
+    });
 
     // --- DATA SEMESTER ---
     const semMap = {};

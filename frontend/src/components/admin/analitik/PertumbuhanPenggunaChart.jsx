@@ -6,8 +6,8 @@ function PertumbuhanPenggunaChart({ growthData = [] }) {
     return (
         <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col h-[380px] w-full">
             <div>
-                <h3 className="text-base font-bold text-slate-800">Pertumbuhan Pengguna</h3>
-                <p className="text-sm text-slate-500">Total pengguna terdaftar per bulan</p>
+                <h3 className="text-base font-bold text-slate-800">Total Pengguna Terdaftar</h3>
+                <p className="text-sm text-slate-500">Akumulasi jumlah pengguna yang terdaftar dari waktu ke waktu</p>
             </div>
 
             <div className="flex-1 w-full mt-4 min-h-[220px]">

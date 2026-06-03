@@ -52,21 +52,7 @@ function DashboardAdmin() {
 
     return (
         <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
-            <div className="flex items-center justify-between mb-2">
-                <div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-slate-800">Dashboard Admin</h1>
-                    <p className="text-sm md:text-base text-slate-500">Pantau metrik dan aktivitas pengguna hari ini.</p>
-                </div>
-                <button 
-                    onClick={fetchData} 
-                    disabled={isRefreshing}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50"
-                >
-                    <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
-                    <span className="hidden sm:inline">Refresh Data</span>
-                </button>
-            </div>
-            
+
             <StatsCards stats={stats} />
             <AnalyticsCharts trendData={analytics?.trendData} distributionData={syncDistributionData()} />
             <RecentActivities 

@@ -8,7 +8,7 @@ import Avatar from '../../components/ui/Avatar'
 
 // (Notifikasi dihapus — fitur tidak digunakan)
 
-function Topbar({ onToggleSidebar, title, subtitle }) {
+function Topbar({ onToggleSidebar, title, subtitle, show = true }) {
   const navigate = useNavigate()
   const [profileOpen, setProfileOpen] = useState(false)
   const [showLogout, setShowLogout] = useState(false)
@@ -36,8 +36,13 @@ function Topbar({ onToggleSidebar, title, subtitle }) {
 
   return (
     <>
-      {/* REVISI DI SINI: Mengubah z-10 menjadi z-40 agar mengambang di atas semua konten halaman */}
-      <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-4 md:px-6 sticky top-0 z-40">
+      {/* REVISI DI SINI: Menerapkan animasi h-0 dan h-16 berdasarkan prop 'show'. lg: memastikan di desktop selalu tampil */}
+      <header className={classNames(
+        "bg-white flex items-center justify-between px-4 md:px-6 z-40 transition-all duration-300 ease-in-out shrink-0",
+        show 
+          ? "h-16 opacity-100 border-b border-slate-100 pointer-events-auto" 
+          : "h-0 opacity-0 border-transparent pointer-events-none lg:h-16 lg:opacity-100 lg:border-b lg:border-slate-100 lg:pointer-events-auto"
+      )}>
 
         {/* Kiri */}
         <div className="flex items-center gap-3">

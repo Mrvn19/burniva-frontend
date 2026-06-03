@@ -17,22 +17,10 @@ function InfoItem({ icon: Icon, label, value, hideBorder }) {
 function ProfileView({ user }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 w-full items-start pb-4">
-      {/* --- Kiri: Akun --- */}
+      {/* --- Kiri: Data Diri --- */}
       <div className="bg-white rounded-2xl border-[0.67px] border-gray-200 p-4 md:p-8 shadow-sm flex flex-col gap-4 md:gap-6">
         <div className="flex flex-col gap-1">
-          <h3 className="text-lg font-bold text-neutral-950 leading-7">Akun</h3>
-          <p className="text-sm text-gray-500 leading-5">Informasi login kamu</p>
-        </div>
-        <div className="flex flex-col">
-          <InfoItem icon={User} label="Nama Lengkap" value={user.nama || '-'} />
-          <InfoItem icon={Mail} label="Email" value={user.email || '-'} hideBorder={true} />
-        </div>
-      </div>
-
-      {/* --- Kanan: Data Mahasiswa --- */}
-      <div className="bg-white rounded-2xl border-[0.67px] border-gray-200 p-4 md:p-8 shadow-sm flex flex-col gap-4 md:gap-6">
-        <div className="flex flex-col gap-1">
-          <h3 className="text-lg font-bold text-neutral-950 leading-7">Data Pribadi</h3>
+          <h3 className="text-lg font-bold text-neutral-950 leading-7">Data Diri</h3>
           <p className="text-sm text-gray-500 leading-5">Informasi dasar pengguna sebagai mahasiswa.</p>
         </div>
         <div className="flex flex-col">
@@ -41,6 +29,18 @@ function ProfileView({ user }) {
           <InfoItem icon={GraduationCap} label="Universitas" value={user.universitas || 'Belum diisi'} />
           <InfoItem icon={GraduationCap} label="Program Studi" value={user.prodi || 'Belum diisi'} />
           <InfoItem icon={BookOpen} label="Semester" value={user.semester ? `Semester ${user.semester}` : 'Belum diisi'} hideBorder={true} />
+        </div>
+      </div>
+
+      {/* --- Kanan: Akun --- */}
+      <div className="bg-white rounded-2xl border-[0.67px] border-gray-200 p-4 md:p-8 shadow-sm flex flex-col gap-4 md:gap-6">
+        <div className="flex flex-col gap-1">
+          <h3 className="text-lg font-bold text-neutral-950 leading-7">Informasi Akun</h3>
+          <p className="text-sm text-gray-500 leading-5">Informasi login akun Anda.</p>
+        </div>
+        <div className="flex flex-col">
+          <InfoItem icon={User} label="Nama Lengkap" value={user.nama || '-'} />
+          <InfoItem icon={Mail} label="Email" value={user.email || '-'} hideBorder={true} />
         </div>
       </div>
     </div>

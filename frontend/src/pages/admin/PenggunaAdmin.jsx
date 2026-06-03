@@ -4,6 +4,7 @@ import PenggunaTable from '../../components/admin/pengguna/PenggunaTable'
 import PenggunaPagination from '../../components/admin/pengguna/PenggunaPagination'
 import PrivacyBanner from '../../components/admin/pengguna/PrivacyBanner'
 import UserDetailModal from '../../components/admin/pengguna/UserDetailModal'
+import ConfirmationModal from '../../components/common/ConfirmationModal'
 import adminService from '../../services/admin/adminService'
 
 function PenggunaAdmin() {
@@ -22,6 +23,16 @@ function PenggunaAdmin() {
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 6 // Diubah menjadi 6 agar pas dengan mockup "Menampilkan 6 dari 8 pengguna"
 
+    // State untuk konfirmasi
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        confirmText: '',
+        variant: 'danger',
+        onConfirm: () => {}
+    })
+
     const fetchUsers = async () => {
         setIsLoading(true)
         try {
@@ -31,14 +42,17 @@ function PenggunaAdmin() {
                 id: u.id,
                 name: u.name,
                 email: u.email,
+                profile_image: u.profile_image,
                 univ: u.university || '-',
                 prodi: u.major || '-',
                 semester: u.semester || '-',
+                lastBurnout: u.last_burnout_score,
                 risk: u.last_burnout_prediction || 'Belum ada',
                 mentalHealth: u.last_mental_health_prediction || 'N/A',
                 isSuspended: u.is_suspended,
                 createdAt: u.createdAt,
-                totalAssessments: u.total_assessments
+                totalAssessments: u.total_assessments,
+                lastAssessmentDate: u.last_assessment_date
             }))
             setUsers(formatted)
         } catch (error) {
@@ -71,43 +85,57 @@ function PenggunaAdmin() {
     }
 
     // Fungsi hapus user
-    const deleteUser = async (id) => {
-        if (window.confirm('Yakin ingin menghapus pengguna ini? Semua data terkait (Todo, History) juga akan terhapus secara permanen.')) {
-            try {
-                setIsLoading(true);
-                await adminService.deleteUser(id)
-                await fetchUsers() // Refresh data
-                setCurrentPage(1)
-                if (selectedUser && selectedUser.id === id) {
-                    setSelectedUser(null)
+    const deleteUser = (id) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Hapus Pengguna',
+            message: 'Yakin ingin menghapus pengguna ini? Semua data terkait (Todo, History) juga akan terhapus secara permanen.',
+            confirmText: 'Ya, Hapus',
+            variant: 'danger',
+            onConfirm: async () => {
+                try {
+                    setIsLoading(true);
+                    await adminService.deleteUser(id)
+                    await fetchUsers() // Refresh data
+                    setCurrentPage(1)
+                    if (selectedUser && selectedUser.id === id) {
+                        setSelectedUser(null)
+                    }
+                } catch (error) {
+                    console.error("Gagal menghapus pengguna", error)
+                    alert("Gagal menghapus pengguna")
+                } finally {
+                    setIsLoading(false);
                 }
-            } catch (error) {
-                console.error("Gagal menghapus pengguna", error)
-                alert("Gagal menghapus pengguna")
-            } finally {
-                setIsLoading(false);
             }
-        }
+        });
     }
 
     // Fungsi reset input harian user
-    const resetInput = async (id) => {
-        if (window.confirm('Yakin ingin mereset akses Cek Harian pengguna ini untuk hari ini? Data assessment hari ini akan dihapus.')) {
-            try {
-                setIsLoading(true);
-                const res = await adminService.resetDailyInput(id);
-                alert(res.message || "Akses berhasil di-reset.");
-                await fetchUsers(); // Refresh data
-                if (selectedUser && selectedUser.id === id) {
-                    setSelectedUser(null);
+    const resetInput = (id) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Reset Input Harian',
+            message: 'Yakin ingin mereset akses Cek Harian pengguna ini untuk hari ini? Data assessment hari ini akan dihapus.',
+            confirmText: 'Ya, Reset',
+            variant: 'warning',
+            onConfirm: async () => {
+                try {
+                    setIsLoading(true);
+                    const res = await adminService.resetDailyInput(id);
+                    alert(res.message || "Akses berhasil di-reset.");
+                    await fetchUsers(); // Refresh data
+                    if (selectedUser && selectedUser.id === id) {
+                        setSelectedUser(null);
+                    }
+                } catch (error) {
+                    console.error("Gagal mereset akses pengguna", error);
+                    alert(error.response?.data?.message || "Gagal mereset akses pengguna");
+                } finally {
+                    setIsLoading(false);
                 }
-            } catch (error) {
-                console.error("Gagal mereset akses pengguna", error);
-                alert(error.response?.data?.message || "Gagal mereset akses pengguna");
-            } finally {
-                setIsLoading(false);
             }
-        }
+        });
     }
 
     // Menghitung data yang sudah difilter
@@ -189,6 +217,12 @@ function PenggunaAdmin() {
                     onResetInput={resetInput}
                 />
             )}
+
+            {/* Modal Konfirmasi Umum */}
+            <ConfirmationModal
+                {...confirmModal}
+                onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+            />
 
         </div>
     )

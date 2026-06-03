@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowRight, CheckCircle2, ShieldCheck, Activity, CalendarCheck, Calendar } from 'lucide-react'
+import { ArrowRight, CheckCircle2, ShieldCheck, Activity, CalendarCheck, Calendar, Clock, Sparkles, BrainCircuit } from 'lucide-react'
 import { ROUTES } from '../utils/constants'
 import StepIndicator from '../components/form/StepIndicator'
 import MentalStep from '../components/form/MentalStep'
@@ -11,14 +11,17 @@ import LoadingScreen from '../components/common/LoadingScreen'
 import { createAssessment } from '../services/assessmentService'
 import { getDashboard } from '../services/dashboardService'
 import { motion } from 'framer-motion'
+import useAuthStore from '../store/auth/useAuthStore'
 
 function Input() {
   const navigate = useNavigate()
+  const user = useAuthStore(state => state.user)
   const [step, setStep] = useState(1)
-  
+
   // Status UX
   const [isChecking, setIsChecking] = useState(true)
   const [isLocked, setIsLocked] = useState(false)
+  const [isProfileIncomplete, setIsProfileIncomplete] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
 
   const [formData, setFormData] = useState({
@@ -39,11 +42,17 @@ function Input() {
   useEffect(() => {
     const checkDailyInput = async () => {
       try {
+        // Cek kelengkapan profil terlebih dahulu (Univ, Prodi, Semester)
+        if (!user?.university || !user?.major || !user?.semester) {
+          setIsProfileIncomplete(true);
+          return; // Hentikan eksekusi, tampilkan halaman blokir
+        }
+
         const data = await getDashboard();
         if (data?.latest?.createdAt) {
           const latestDate = new Date(data.latest.createdAt).toLocaleDateString();
           const todayDate = new Date().toLocaleDateString();
-          
+
           if (latestDate === todayDate) {
             setIsLocked(true);
             return;
@@ -82,11 +91,20 @@ function Input() {
     }
   };
 
+  useEffect(() => {
+    // Reset scroll ketika pindah antar step di halaman yang sama
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    const mainElement = document.getElementById('main-content-wrapper');
+    if (mainElement) {
+      mainElement.scrollTop = 0;
+    }
+  }, [step]);
+
   // 1. STATE: LOADING (Mengecek Status)
   if (isChecking) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-[#F8FAFC] p-4">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           className="bg-white rounded-3xl p-8 max-w-md w-full shadow-[0px_10px_40px_-10px_rgba(0,0,0,0.08)] border border-slate-100 flex flex-col items-center text-center"
@@ -111,7 +129,7 @@ function Input() {
   if (isLocked) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-[#F8FAFC] p-4">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
@@ -121,8 +139,8 @@ function Input() {
           <div className="bg-primary-500 p-8 flex flex-col items-center justify-center relative overflow-hidden">
             <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10" />
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary-700/20 rounded-full blur-xl -ml-10 -mb-10" />
-            
-            <motion.div 
+
+            <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
@@ -130,7 +148,7 @@ function Input() {
             >
               <CheckCircle2 className="w-10 h-10 text-primary-500" />
             </motion.div>
-            <h2 className="text-2xl font-bold text-white relative z-10 text-center">✅ Cek Harian Hari Ini Sudah Selesai</h2>
+            <h2 className="text-2xl font-bold text-white relative z-10 text-center">Cek Harian Hari Ini Sudah Selesai</h2>
           </div>
 
           {/* Content */}
@@ -158,24 +176,77 @@ function Input() {
 
             {/* Actions */}
             <div className="flex flex-col gap-3">
-              <button 
+              <button
                 onClick={() => navigate(ROUTES.RESULT)}
                 className="w-full h-12 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
               >
                 <Activity size={18} />
                 Lihat Analisis Hari Ini
               </button>
-              <button 
+              <button
                 onClick={() => navigate(ROUTES.DASHBOARD)}
                 className="w-full h-12 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-xl border border-slate-200 transition-all flex items-center justify-center"
               >
                 Kembali ke Dashboard
               </button>
-              <button 
+              <button
                 onClick={() => navigate(ROUTES.HISTORY)}
                 className="w-full mt-1 text-sm text-slate-400 hover:text-primary-500 font-medium transition-colors"
               >
                 Riwayat Assessment
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
+
+  // 2.5 STATE: PROFIL BELUM LENGKAP
+  if (isProfileIncomplete) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-[#F8FAFC] p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="bg-white rounded-3xl overflow-hidden max-w-lg w-full shadow-[0px_20px_40px_-10px_rgba(0,0,0,0.08)] border border-slate-100"
+        >
+          {/* Header Graphic */}
+          <div className="bg-amber-500 p-8 flex flex-col items-center justify-center relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-amber-700/20 rounded-full blur-xl -ml-10 -mb-10" />
+
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="w-20 h-20 bg-white rounded-2xl shadow-lg flex items-center justify-center relative z-10 mb-4"
+            >
+              <ShieldCheck className="w-10 h-10 text-amber-500" />
+            </motion.div>
+            <h2 className="text-2xl font-bold text-white relative z-10 text-center">Profil Belum Lengkap</h2>
+          </div>
+
+          {/* Content */}
+          <div className="p-8">
+            <p className="text-slate-600 text-center text-sm leading-relaxed mb-6">
+              Lengkapi profil kamu terlebih dahulu untuk mengakses seluruh fitur BURNIVA dan mendapatkan pengalaman penggunaan yang lebih baik.
+            </p>
+
+            {/* Actions */}
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => navigate(ROUTES.PROFILE)}
+                className="w-full h-12 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              >
+                Lengkapi Profil Sekarang
+              </button>
+              <button
+                onClick={() => navigate(ROUTES.DASHBOARD)}
+                className="w-full h-12 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-xl border border-slate-200 transition-all flex items-center justify-center"
+              >
+                Kembali ke Dashboard
               </button>
             </div>
           </div>
@@ -192,46 +263,7 @@ function Input() {
   // 4. STATE: FORM INPUT NORMAL
   return (
     <div className="p-3 pb-24 md:p-10 md:pb-10 w-full max-w-4xl mx-auto min-h-screen bg-[#F8FAFC] flex flex-col pt-6 md:pt-12">
-      
-      {/* 🧠 HEADER & EDUCATIONAL INFO */}
-      <div className="mb-8 flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 flex items-center gap-2">
-            🧠 Cek Harian
-          </h1>
-          <p className="text-slate-500 text-sm md:text-base leading-relaxed max-w-2xl">
-            Lakukan assessment kesehatan mental harian untuk membantu Burniva menganalisis tingkat burnout dan memberikan rekomendasi terbaik untukmu.
-          </p>
-        </div>
 
-        {/* Mini Info Card Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-1">
-            <span className="text-xs font-medium text-slate-400">🕒 Waktu Pengisian</span>
-            <span className="text-sm font-semibold text-slate-800">± 2–3 menit</span>
-          </div>
-          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-1">
-            <span className="text-xs font-medium text-slate-400">📅 Frekuensi</span>
-            <span className="text-sm font-semibold text-slate-800">1 kali setiap hari</span>
-          </div>
-          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-1">
-            <span className="text-xs font-medium text-slate-400">🧠 Tujuan</span>
-            <span className="text-sm font-semibold text-slate-800">Analisis burnout</span>
-          </div>
-          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-1">
-            <span className="text-xs font-medium text-slate-400">✨ Benefit</span>
-            <span className="text-sm font-semibold text-slate-800">Insight & To-Do AI</span>
-          </div>
-        </div>
-
-        {/* Educational Notice */}
-        <div className="bg-primary-50/50 border border-primary-100 p-5 rounded-2xl">
-          <h3 className="text-sm font-bold text-primary-700 mb-1">Kenapa perlu cek harian?</h3>
-          <p className="text-sm text-primary-600/80 leading-relaxed">
-            Assessment harian membantu Burniva memahami pola kesehatan mentalmu dari waktu ke waktu. Semakin rutin kamu mengisi check-in harian, semakin akurat insight burnout dan rekomendasi AI yang diberikan.
-          </p>
-        </div>
-      </div>
 
       {/* FORM SECTION */}
       <StepIndicator currentStep={step} />

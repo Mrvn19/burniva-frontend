@@ -1,4 +1,5 @@
 import { Search } from 'lucide-react'
+import CustomDropdown from '../../ui/CustomDropdown'
 
 function PenggunaFilters({ searchTerm, setSearchTerm, filterUniv, setFilterUniv, filterRisk, setFilterRisk, univOptions = [] }) {
     return (
@@ -16,27 +17,34 @@ function PenggunaFilters({ searchTerm, setSearchTerm, filterUniv, setFilterUniv,
             </div>
 
             {/* Filter Dropdowns */}
-            <div className="flex gap-3">
-                <select
-                    value={filterUniv}
-                    onChange={(e) => setFilterUniv(e.target.value)}
-                    className="border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-white text-slate-600 focus:outline-none focus:border-primary-500 outline-none cursor-pointer w-full sm:w-auto"
-                >
-                    <option value="">Semua Universitas</option>
-                    {univOptions.map((univ, index) => (
-                        <option key={index} value={univ}>{univ}</option>
-                    ))}
-                </select>
-                <select
-                    value={filterRisk}
-                    onChange={(e) => setFilterRisk(e.target.value)}
-                    className="border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-white text-slate-600 focus:outline-none focus:border-primary-500 outline-none cursor-pointer w-full sm:w-auto"
-                >
-                    <option value="">Semua Risiko</option>
-                    <option value="Tinggi">Tinggi</option>
-                    <option value="Sedang">Sedang</option>
-                    <option value="Rendah">Rendah</option>
-                </select>
+            <div className="flex flex-col sm:flex-row gap-3">
+                <div className="w-full sm:w-48">
+                    <CustomDropdown
+                        name="filterUniv"
+                        value={filterUniv}
+                        onChange={(e) => setFilterUniv(e.target.value)}
+                        options={[
+                            { label: 'Semua Universitas', value: '' },
+                            ...univOptions.map(u => ({ label: u, value: u }))
+                        ]}
+                        placeholder="Semua Universitas"
+                        searchable={true}
+                    />
+                </div>
+                <div className="w-full sm:w-48">
+                    <CustomDropdown
+                        name="filterRisk"
+                        value={filterRisk}
+                        onChange={(e) => setFilterRisk(e.target.value)}
+                        options={[
+                            { label: 'Semua Risiko', value: '' },
+                            { label: 'Tinggi', value: 'Tinggi' },
+                            { label: 'Sedang', value: 'Sedang' },
+                            { label: 'Rendah', value: 'Rendah' }
+                        ]}
+                        placeholder="Semua Risiko"
+                    />
+                </div>
             </div>
         </div>
     )

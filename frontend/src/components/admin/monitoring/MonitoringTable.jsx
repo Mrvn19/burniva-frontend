@@ -1,9 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { classNames } from '../../../utils/helpers'
+import { formatBurnout, formatMental, getBurnoutColor, getMentalColor } from '../../../utils/format'
 import PenggunaPagination from '../pengguna/PenggunaPagination'
 
 function MonitoringTable({ data = [], activePeriod = 'mingguan', onPeriodChange }) {
     const periods = [
+        { id: 'semua', label: 'Semua Waktu' },
         { id: 'hari_ini', label: 'Hari ini' },
         { id: 'mingguan', label: 'Mingguan' },
         { id: 'bulanan', label: 'Bulanan' }
@@ -11,18 +13,13 @@ function MonitoringTable({ data = [], activePeriod = 'mingguan', onPeriodChange 
 
     // Helper for risk badge styling
     const getRiskBadgeStyles = (risk) => {
-        const l = (risk || '').toLowerCase();
-        if (l === 'high' || l === 'tinggi') return 'bg-red-50 text-red-600 border-red-100';
-        if (l === 'medium' || l === 'sedang') return 'bg-amber-50 text-amber-600 border-amber-100';
-        if (l === 'low' || l === 'rendah') return 'bg-emerald-50 text-emerald-600 border-emerald-100';
-        return 'bg-slate-50 text-slate-600 border-slate-100';
+        const c = getBurnoutColor(risk);
+        return `${c.bg} ${c.text} ${c.border}`;
     }
 
     const getMentalHealthBadgeStyles = (status) => {
-        const s = (status || '').toLowerCase();
-        if (s === 'baik') return 'bg-emerald-50 text-emerald-600 border-emerald-100';
-        if (s === 'buruk') return 'bg-red-50 text-red-600 border-red-100';
-        return 'bg-slate-50 text-slate-600 border-slate-100';
+        const c = getMentalColor(status);
+        return `${c.bg} ${c.text} ${c.border}`;
     }
 
     const [currentPage, setCurrentPage] = useState(1)
@@ -75,15 +72,16 @@ function MonitoringTable({ data = [], activePeriod = 'mingguan', onPeriodChange 
                     <thead>
                         <tr className="bg-slate-50/75 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                             <th className="py-4 px-6">Nama User</th>
-                            <th className="py-4 px-6">Kesehatan Mental</th>
-                            <th className="py-4 px-6">Prediksi Burnout</th>
+                            <th className="py-4 px-6 text-center">Indeks Risiko</th>
+                            <th className="py-4 px-6">Kategori AI</th>
+                            <th className="py-4 px-6">Kondisi Mental AI</th>
                             <th className="py-4 px-6">Tanggal Assessment</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100/80">
                         {data.length === 0 ? (
                             <tr>
-                                <td colSpan="4" className="py-10 text-center text-sm text-slate-400 font-medium">
+                                <td colSpan="5" className="py-10 text-center text-sm text-slate-400 font-medium">
                                     Tidak ada data assessment untuk periode ini.
                                 </td>
                             </tr>
@@ -96,12 +94,9 @@ function MonitoringTable({ data = [], activePeriod = 'mingguan', onPeriodChange 
                                     <td className="py-4 px-6 font-semibold text-slate-800">
                                         {row.name}
                                     </td>
-                                    <td className="py-4 px-6">
-                                        <span className={classNames(
-                                            'px-3 py-1 rounded-full text-xs font-bold border inline-block tracking-wide',
-                                            getMentalHealthBadgeStyles(row.mentalHealth)
-                                        )}>
-                                            {row.mentalHealth}
+                                    <td className="py-4 px-6 text-center">
+                                        <span className="font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                                            {row.burnoutScore ?? '-'}
                                         </span>
                                     </td>
                                     <td className="py-4 px-6">
@@ -109,7 +104,15 @@ function MonitoringTable({ data = [], activePeriod = 'mingguan', onPeriodChange 
                                             'px-3 py-1 rounded-full text-xs font-bold border inline-block tracking-wide',
                                             getRiskBadgeStyles(row.risk)
                                         )}>
-                                            {row.risk}
+                                            {formatBurnout(row.risk)}
+                                        </span>
+                                    </td>
+                                    <td className="py-4 px-6">
+                                        <span className={classNames(
+                                            'px-3 py-1 rounded-full text-xs font-bold border inline-block tracking-wide',
+                                            getMentalHealthBadgeStyles(row.mentalHealth)
+                                        )}>
+                                            {formatMental(row.mentalHealth)}
                                         </span>
                                     </td>
                                     <td className="py-4 px-6 text-slate-500">

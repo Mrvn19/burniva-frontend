@@ -124,19 +124,42 @@ function LifestyleStep({ formData, setFormData }) {
   const minutesTidur = Math.round(((formData.sleep_hours || 0) - hoursTidur) * 60);
 
   const handleTidurChange = (h, m) => {
-    const decimalValue = h + (m / 60);
+    let decimalValue = h + (m / 60);
+    
+    const MAX_SLEEP = 14;
+    if (decimalValue > MAX_SLEEP) decimalValue = MAX_SLEEP;
+
+    const currentStudy = formData.study_hours || 0;
+    const currentActivity = formData.activity_hours || 0;
+    const maxAllowed = 24 - currentStudy - currentActivity;
+
+    if (decimalValue > maxAllowed) decimalValue = maxAllowed;
+    if (decimalValue < 0) decimalValue = 0;
+
     setFormData({ ...formData, sleep_hours: Number(decimalValue.toFixed(2)) });
   };
 
-  // --- KONVERSI DATA: Aktivitas Fisik (Disimpan sebagai Total Menit, misal 195) ---
-  const totalMenitFisik = Number(formData.activity_hours) || 0;
-  const hoursFisik = Math.floor(totalMenitFisik / 60);
-  const minutesFisik = totalMenitFisik % 60;
+  // --- KONVERSI DATA: Aktivitas Fisik (Disimpan sebagai Desimal Jam, misal 1.5) ---
+  const hoursFisik = Math.floor(formData.activity_hours || 0);
+  const minutesFisik = Math.round(((formData.activity_hours || 0) - hoursFisik) * 60);
 
   const handleFisikChange = (h, m) => {
-    const totalMins = (h * 60) + m;
-    setFormData({ ...formData, activity_hours: totalMins });
+    let decimalValue = h + (m / 60);
+    
+    const MAX_ACTIVITY = 8;
+    if (decimalValue > MAX_ACTIVITY) decimalValue = MAX_ACTIVITY;
+
+    const currentStudy = formData.study_hours || 0;
+    const currentSleep = formData.sleep_hours || 0;
+    const maxAllowed = 24 - currentStudy - currentSleep;
+
+    if (decimalValue > maxAllowed) decimalValue = maxAllowed;
+    if (decimalValue < 0) decimalValue = 0;
+
+    setFormData({ ...formData, activity_hours: Number(decimalValue.toFixed(2)) });
   };
+
+  const isTotalMaxed = (formData.study_hours || 0) + (formData.sleep_hours || 0) + (formData.activity_hours || 0) >= 24;
 
   return (
     <div className="flex flex-col gap-5 md:gap-7 w-full">
@@ -155,13 +178,22 @@ function LifestyleStep({ formData, setFormData }) {
       <div className="flex flex-col gap-4 md:gap-5 w-full">
 
         {/* 1. Jam Tidur (Custom Time Picker) */}
-        <TimePickerCard
-          title="Berapa jam kamu tidur tadi malam?"
-          hours={hoursTidur}
-          minutes={minutesTidur}
-          onTimeChange={handleTidurChange}
-          displayValue={formatTimeDisplay(hoursTidur, minutesTidur)}
-        />
+        <div>
+          <TimePickerCard
+            title="Berapa jam kamu tidur tadi malam?"
+            hours={hoursTidur}
+            minutes={minutesTidur}
+            onTimeChange={handleTidurChange}
+            displayValue={formatTimeDisplay(hoursTidur, minutesTidur)}
+          />
+          <div className="px-2 mt-2">
+            {formData.sleep_hours >= 14 ? (
+              <p className="text-[11px] md:text-xs text-orange-500 font-medium">Batas maksimal jam tidur adalah 14 jam.</p>
+            ) : isTotalMaxed ? (
+              <p className="text-[11px] md:text-xs text-orange-500 font-medium">Total seluruh waktu aktivitasmu hari ini telah mencapai batas 24 jam.</p>
+            ) : null}
+          </div>
+        </div>
 
         {/* 2. Tekanan Finansial (Slider) */}
         <Slider
@@ -197,13 +229,22 @@ function LifestyleStep({ formData, setFormData }) {
         />
 
         {/* 5. Aktivitas Fisik (Custom Time Picker) */}
-        <TimePickerCard
-          title="Berapa lama kamu berolahraga atau beraktivitas fisik hari ini?"
-          hours={hoursFisik}
-          minutes={minutesFisik}
-          onTimeChange={handleFisikChange}
-          displayValue={formatTimeDisplay(hoursFisik, minutesFisik)}
-        />
+        <div>
+          <TimePickerCard
+            title="Berapa lama kamu berolahraga atau beraktivitas fisik hari ini?"
+            hours={hoursFisik}
+            minutes={minutesFisik}
+            onTimeChange={handleFisikChange}
+            displayValue={formatTimeDisplay(hoursFisik, minutesFisik)}
+          />
+          <div className="px-2 mt-2">
+            {formData.activity_hours >= 8 ? (
+              <p className="text-[11px] md:text-xs text-orange-500 font-medium">Batas maksimal aktivitas fisik adalah 8 jam.</p>
+            ) : isTotalMaxed ? (
+              <p className="text-[11px] md:text-xs text-orange-500 font-medium">Total seluruh waktu aktivitasmu hari ini telah mencapai batas 24 jam.</p>
+            ) : null}
+          </div>
+        </div>
 
       </div>
     </div>

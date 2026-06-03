@@ -11,6 +11,7 @@ const authMiddleware =
 
 const {
   createAssessment,
+  resetTodayAssessment,
 } = require(
   '../controllers/assessmentController'
 )
@@ -19,6 +20,12 @@ router.post(
   '/',
   authMiddleware,
   createAssessment
+)
+
+router.delete(
+  '/reset',
+  authMiddleware,
+  resetTodayAssessment
 )
 
 module.exports =

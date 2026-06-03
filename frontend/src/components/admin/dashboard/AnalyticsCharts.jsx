@@ -18,12 +18,10 @@ function AnalyticsCharts({ trendData = [], distributionData = [] }) {
                         <h3 className="text-base font-bold text-slate-800">Grafik Tren Burnout</h3>
                         <p className="text-sm text-slate-500">Perubahan tingkat risiko burnout</p>
                     </div>
-                    <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-100">
-                        <button
-                            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors bg-white text-primary-500 shadow-sm border border-slate-200 cursor-default`}
-                        >
+                    <div className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+                        <span className="text-xs font-semibold text-slate-500">
                             7 Hari Terakhir
-                        </button>
+                        </span>
                     </div>
                 </div>
                 
@@ -44,16 +42,8 @@ function AnalyticsCharts({ trendData = [], distributionData = [] }) {
                 {/* Legend Custom */}
                 <div className="flex justify-center items-center gap-4 mt-6 pt-4 border-t border-slate-50">
                     <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-full border-[2px] border-emerald-500 bg-white" />
-                        <span className="text-xs font-medium text-emerald-500">rendah</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-full border-[2px] border-amber-500 bg-white" />
-                        <span className="text-xs font-medium text-amber-500">sedang</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-full border-[2px] border-red-500 bg-white" />
-                        <span className="text-xs font-medium text-red-500">tinggi</span>
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#006D5B]" />
+                        <span className="text-xs font-medium text-slate-500">Rata-rata Skor Burnout (0-100)</span>
                     </div>
                 </div>
             </div>

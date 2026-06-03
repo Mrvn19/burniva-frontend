@@ -56,8 +56,9 @@ function History() {
   // Mapping Mental Health
   const getMentalHealthUI = (status) => {
     const s = (status || '').toLowerCase();
-    if (s === 'baik') return { label: 'Stabil', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200' };
-    if (s === 'buruk') return { label: 'Perlu Perhatian', color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200' };
+    if (s === 'baik' || s === 'good') return { label: 'Baik', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200' };
+    if (s === 'sedang' || s === 'medium') return { label: 'Sedang', color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-200' };
+    if (s === 'buruk' || s === 'bad') return { label: 'Buruk', color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200' };
     return { label: 'Belum ada', color: 'text-slate-700', bg: 'bg-slate-50', border: 'border-slate-200' };
   };
 
@@ -75,7 +76,7 @@ function History() {
         
         <div className="flex flex-col gap-4">
               {history.map((item) => {
-                const burnoutUI = getBurnoutUI(item.Prediction?.burnout_prediction || item.burnout_level);
+                const burnoutUI = getBurnoutUI(item.burnout_level);
                 const mentalUI = getMentalHealthUI(item.Prediction?.mental_health_prediction);
 
                 return (
@@ -93,7 +94,16 @@ function History() {
                     
                     <div className="flex flex-wrap items-center gap-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-slate-500 w-24">Prediksi Burnout:</span>
+                        <span className="text-xs font-semibold text-slate-500 w-24">Indeks Risiko:</span>
+                        <span className="text-xs font-bold px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-700">
+                          {item.burnout_score ?? '-'}/100
+                        </span>
+                      </div>
+                      
+                      <div className="hidden sm:block w-px h-4 bg-slate-200" />
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-slate-500 w-24 sm:w-auto">Kategori AI:</span>
                         <span className={classNames('text-xs font-bold px-2.5 py-1 rounded-lg border', burnoutUI.color, burnoutUI.bg, burnoutUI.border)}>
                           {burnoutUI.label}
                         </span>
@@ -102,7 +112,7 @@ function History() {
                       <div className="hidden sm:block w-px h-4 bg-slate-200" />
                       
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-slate-500 w-24 sm:w-auto">Mental Health:</span>
+                        <span className="text-xs font-semibold text-slate-500 w-24 sm:w-auto">Kondisi Mental AI:</span>
                         <span className={classNames('text-xs font-bold px-2.5 py-1 rounded-lg border', mentalUI.color, mentalUI.bg, mentalUI.border)}>
                           {mentalUI.label}
                         </span>

@@ -23,11 +23,21 @@ function AcademicStep({ formData, setFormData }) {
         m = 0; // Batasi agar tidak minus
       }
     }
-    if (h < 0) h = 0;
-    if (h > 24) h = 24;
 
-    // Kembalikan ke format desimal untuk disimpan (contoh: 1 jam 15 menit -> 1.25)
-    const decimalValue = h + (m / 60);
+    let decimalValue = h + (m / 60);
+    
+    // Batas maksimal individu
+    const MAX_STUDY = 16;
+    if (decimalValue > MAX_STUDY) decimalValue = MAX_STUDY;
+
+    // Batas maksimal total 24 jam
+    const currentSleep = formData.sleep_hours || 0;
+    const currentActivity = formData.activity_hours || 0;
+    const maxAllowed = 24 - currentSleep - currentActivity;
+
+    if (decimalValue > maxAllowed) decimalValue = maxAllowed;
+    if (decimalValue < 0) decimalValue = 0;
+
     setFormData({ ...formData, study_hours: Number(decimalValue.toFixed(2)) });
   };
 
@@ -146,6 +156,15 @@ function AcademicStep({ formData, setFormData }) {
             </div>
 
           </div>
+        </div>
+        
+        {/* Helper Text untuk Batas Waktu */}
+        <div className="px-2">
+          {formData.study_hours >= 16 ? (
+            <p className="text-[11px] md:text-xs text-orange-500 font-medium">Batas maksimal jam belajar adalah 16 jam.</p>
+          ) : (formData.study_hours + (formData.sleep_hours || 0) + (formData.activity_hours || 0) >= 24) ? (
+            <p className="text-[11px] md:text-xs text-orange-500 font-medium">Total seluruh waktu aktivitasmu hari ini telah mencapai batas 24 jam.</p>
+          ) : null}
         </div>
 
       </div>

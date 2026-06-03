@@ -1,19 +1,15 @@
 import { Eye, Ban, Unlock, Trash2 } from 'lucide-react'
+import { formatBurnout, formatMental, getBurnoutColor, getMentalColor } from '../../../utils/format'
 
 // Fungsi pembantu untuk warna badge risiko
 const getRiskBadgeColor = (risk) => {
-    const l = (risk || '').toLowerCase();
-    if (l === 'high' || l === 'tinggi') return 'bg-red-50 text-red-500 border-red-100';
-    if (l === 'medium' || l === 'sedang') return 'bg-amber-50 text-amber-500 border-amber-100';
-    if (l === 'low' || l === 'rendah') return 'bg-emerald-50 text-emerald-500 border-emerald-100';
-    return 'bg-slate-50 text-slate-500 border-slate-100';
+    const c = getBurnoutColor(risk);
+    return `${c.bg} ${c.text} ${c.border}`;
 }
 
 const getMentalHealthBadgeColor = (status) => {
-    const s = (status || '').toLowerCase();
-    if (s === 'baik') return 'bg-emerald-50 text-emerald-500 border-emerald-100';
-    if (s === 'buruk') return 'bg-red-50 text-red-500 border-red-100';
-    return 'bg-slate-50 text-slate-500 border-slate-100';
+    const c = getMentalColor(status);
+    return `${c.bg} ${c.text} ${c.border}`;
 }
 
 function PenggunaTable({ users, isLoading, toggleSuspend, deleteUser, onViewDetail }) {
@@ -26,8 +22,9 @@ function PenggunaTable({ users, isLoading, toggleSuspend, deleteUser, onViewDeta
                         <th className="px-4 py-4 font-semibold text-slate-600">Email</th>
                         <th className="px-4 py-4 font-semibold text-slate-600">Universitas</th>
                         <th className="px-4 py-4 font-semibold text-slate-600 text-center">Semester</th>
-                        <th className="px-4 py-4 font-semibold text-slate-600 text-center">Mental Health</th>
-                        <th className="px-4 py-4 font-semibold text-slate-600">Status Risiko</th>
+                        <th className="px-4 py-4 font-semibold text-slate-600 text-center">Indeks Risiko</th>
+                        <th className="px-4 py-4 font-semibold text-slate-600 text-center">Kategori AI</th>
+                        <th className="px-4 py-4 font-semibold text-slate-600 text-center">Kondisi Mental AI</th>
                         <th className="px-4 py-4 font-semibold text-slate-600 text-center w-[120px]">Aksi</th>
                     </tr>
                 </thead>
@@ -52,13 +49,18 @@ function PenggunaTable({ users, isLoading, toggleSuspend, deleteUser, onViewDeta
                                 <td className="px-4 py-4 text-slate-500 whitespace-nowrap lg:whitespace-normal">{user.univ}</td>
                                 <td className="px-4 py-4 text-center text-slate-500">{user.semester}</td>
                                 <td className="px-4 py-4 text-center">
-                                    <span className={`inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold border ${getMentalHealthBadgeColor(user.mentalHealth)}`}>
-                                        {user.mentalHealth}
+                                    <span className="font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                                        {user.lastBurnout ?? '-'}
                                     </span>
                                 </td>
-                                <td className="px-4 py-4">
+                                <td className="px-4 py-4 text-center">
                                     <span className={`inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold border ${getRiskBadgeColor(user.risk)}`}>
-                                        {user.risk}
+                                        {formatBurnout(user.risk)}
+                                    </span>
+                                </td>
+                                <td className="px-4 py-4 text-center">
+                                    <span className={`inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold border ${getMentalHealthBadgeColor(user.mentalHealth)}`}>
+                                        {formatMental(user.mentalHealth)}
                                     </span>
                                 </td>
 

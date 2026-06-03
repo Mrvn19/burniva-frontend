@@ -1,7 +1,9 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import Input from '../ui/Input';
+import CustomDropdown from '../ui/CustomDropdown';
 import Avatar from '../ui/Avatar';
+import ConfirmationModal from '../common/ConfirmationModal';
 
 function ProfileEdit({
   form,
@@ -16,6 +18,14 @@ function ProfileEdit({
   securityErrorMsg
 }) {
   const fileInputRef = useRef(null);
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    variant: 'danger',
+    onConfirm: () => { }
+  });
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -42,8 +52,8 @@ function ProfileEdit({
       {/* --- Kiri: Informasi Pribadi --- */}
       <div className="bg-white rounded-2xl border-[0.67px] border-gray-200 p-4 md:p-8 shadow-sm flex flex-col gap-4 md:gap-6">
         <div className="flex flex-col gap-1">
-          <h3 className="text-lg font-bold text-neutral-950 leading-7">Informasi Pribadi</h3>
-          <p className="text-sm text-gray-500 leading-5">Perbarui informasi personal dan status akademikmu di sini.</p>
+          <h3 className="text-lg font-bold text-neutral-950 leading-7">Data Diri</h3>
+          <p className="text-sm text-gray-500 leading-5">Perbarui informasi personal dan status akademik Anda di sini.</p>
         </div>
 
         {personalErrorMsg && (
@@ -59,16 +69,18 @@ function ProfileEdit({
           {/* Jenis Kelamin */}
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-slate-700">Jenis Kelamin</label>
-            <select
+            <CustomDropdown
               name="jenisKelamin"
               value={form.jenisKelamin || ''}
               onChange={onUserChange}
-              className="w-full h-11 text-sm rounded-xl border border-slate-200 bg-white px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            >
-              <option value="">Pilih Jenis Kelamin</option>
-              <option value="Laki-laki">Laki-laki</option>
-              <option value="Perempuan">Perempuan</option>
-            </select>
+              options={[
+                { label: 'Pilih Jenis Kelamin', value: '' },
+                { label: 'Laki-laki', value: 'Laki-laki' },
+                { label: 'Perempuan', value: 'Perempuan' }
+              ]}
+              placeholder="Pilih Jenis Kelamin"
+              className="h-11"
+            />
           </div>
 
           {/* Umur */}
@@ -114,9 +126,14 @@ function ProfileEdit({
                 <button
                   type="button"
                   onClick={() => {
-                    if (window.confirm('Apakah kamu yakin ingin menghapus foto profil ini?')) {
-                      onImageRemove();
-                    }
+                    setConfirmModal({
+                      isOpen: true,
+                      title: 'Hapus Foto Profil',
+                      message: 'Apakah kamu yakin ingin menghapus foto profil ini?',
+                      confirmText: 'Ya, Hapus',
+                      variant: 'danger',
+                      onConfirm: onImageRemove
+                    });
                   }}
                   className="absolute -top-2 -right-2 w-8 h-8 bg-white border border-red-100 rounded-full flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 shadow-md transition-all z-10"
                   title="Hapus Foto"
@@ -143,7 +160,7 @@ function ProfileEdit({
       <div className="bg-white rounded-2xl border-[0.67px] border-gray-200 p-4 md:p-8 shadow-sm flex flex-col gap-4 md:gap-6">
         <div className="flex flex-col gap-1">
           <h3 className="text-lg font-bold text-neutral-950 leading-7">Keamanan</h3>
-          <p className="text-sm text-gray-500 leading-5">Ubah kata sandi</p>
+          <p className="text-sm text-gray-500 leading-5">Ubah kata sandi akun Anda.</p>
         </div>
 
         {securityErrorMsg && (
@@ -159,6 +176,10 @@ function ProfileEdit({
         </div>
       </div>
 
+      <ConfirmationModal
+        {...confirmModal}
+        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

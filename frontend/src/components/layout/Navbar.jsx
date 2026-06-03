@@ -9,7 +9,8 @@ const navLinks = [
   { label: 'Beranda', href: '#beranda' },
   { label: 'Fitur', href: '#fitur' },
   { label: 'Cara Kerja', href: '#cara-kerja' },
-  { label: 'Tentang', href: '#tentang' },
+  { label: 'Demo User', href: '#demo' },
+  { label: 'FAQ', href: '#faq' },
 ]
 
 function Navbar() {
@@ -94,12 +95,12 @@ function Navbar() {
 
                 <span
                   className={`
-                    absolute left-1/2 -bottom-0.5 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-primary-600
-                    transition-all duration-300 ease-out
+                    absolute left-1/2 -bottom-1 h-[4px] w-[65%] -translate-x-1/2 rounded-full bg-slate-200
+                    transition-all duration-300 ease-out origin-center
                     ${
                       isActive
-                        ? 'opacity-100 scale-100'
-                        : 'opacity-0 scale-0'
+                        ? 'opacity-100 scale-x-100'
+                        : 'opacity-0 scale-x-0'
                     }
                   `}
                 />

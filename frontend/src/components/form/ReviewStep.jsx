@@ -1,4 +1,5 @@
 import React from 'react';
+import { Laugh, Smile, Meh, Frown, Annoyed } from 'lucide-react';
 
 // Sub-komponen untuk merender kotak data (Dioptimalkan ukurannya untuk mode 2 kolom mobile)
 function ReviewItem({ label, value }) {
@@ -28,17 +29,6 @@ function ReviewStep({ formData, setFormData }) {
     return `${h} jam ${m} menit`;
   };
 
-  // 2. Mengubah Total Menit ke format "X jam Y menit" (Untuk Aktivitas Fisik)
-  const formatMinutesToHoursMinutes = (totalMins) => {
-    const mins = Number(totalMins) || 0;
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    
-    if (h === 0) return `${m} menit`;
-    if (m === 0) return `${h} jam`;
-    return `${h} jam ${m} menit`;
-  };
-
   // --- MAPPING DATA KE LABEL ---
   const items = [
     { label: 'Stres',               value: formData.stress },
@@ -50,16 +40,16 @@ function ReviewStep({ formData, setFormData }) {
     { label: 'Tekanan Finansial',   value: formData.financial_pressure },
     { label: 'Ekspektasi Keluarga', value: formData.family_expectation },
     { label: 'Dukungan Sosial',     value: formData.social_support },
-    { label: 'Aktivitas Fisik',     value: formatMinutesToHoursMinutes(formData.activity_hours) },
+    { label: 'Aktivitas Fisik',     value: formatDecimalToHoursMinutes(formData.activity_hours) },
   ];
 
   // --- MOOD TRACKER DATA ---
   const MOODS = [
-    { label: 'Senang', icon: '😊' },
-    { label: 'Tenang', icon: '😌' },
-    { label: 'Biasa', icon: '😐' },
-    { label: 'Sedih', icon: '😞' },
-    { label: 'Overwhelmed', icon: '😫' },
+    { label: 'Senang', icon: <Laugh size={28} /> },
+    { label: 'Tenang', icon: <Smile size={28} /> },
+    { label: 'Biasa', icon: <Meh size={28} /> },
+    { label: 'Sedih', icon: <Frown size={28} /> },
+    { label: 'Overwhelmed', icon: <Annoyed size={28} /> },
   ];
 
   return (
@@ -84,7 +74,9 @@ function ReviewStep({ formData, setFormData }) {
                     : 'bg-white/50 border-transparent hover:bg-white hover:border-primary-200'
                 }`}
               >
-                <span className="text-2xl md:text-3xl">{mood.icon}</span>
+                <div className={`flex items-center justify-center ${isSelected ? 'text-primary-600' : 'text-slate-500'}`}>
+                  {mood.icon}
+                </div>
                 <span className={`text-[10px] md:text-xs font-semibold ${isSelected ? 'text-primary-600' : 'text-slate-500'}`}>
                   {mood.label}
                 </span>

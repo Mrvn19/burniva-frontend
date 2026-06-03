@@ -5,7 +5,10 @@ import { ROUTES } from '../utils/constants';
 import ResultCard from '../components/result/ResultCard';
 import FactorBreakdown from '../components/result/FactorBreakdown';
 import LoadingScreen from '../components/common/LoadingScreen';
+import ConfirmationModal from '../components/common/ConfirmationModal';
 import { getHistoryDetail } from '../services/historyService';
+import { resetAssessmentToday } from '../services/assessmentService';
+import { getBurnoutColor, getMentalColor, formatBurnout, formatMental } from '../utils/format';
 
 function Result() {
   const navigate = useNavigate();
@@ -15,6 +18,25 @@ function Result() {
   const [result, setResult] = useState({});
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
+
+  const handleResetInput = () => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Reset & Input Ulang',
+      message: 'Data assessment dan rekomendasi Todo Anda hari ini akan dihapus. Anda harus mengisi ulang dari awal. Apakah Anda yakin?',
+      onConfirm: async () => {
+        try {
+          await resetAssessmentToday();
+          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+          navigate(ROUTES.INPUT);
+        } catch (error) {
+          console.error("Gagal melakukan reset:", error);
+          alert(error.response?.data?.message || "Terjadi kesalahan saat reset data");
+        }
+      }
+    });
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -55,17 +77,6 @@ function Result() {
       if (titleEl) titleEl.innerText = dateStr;
       if (subtitleEl) subtitleEl.innerText = 'Detail Riwayat Assessment';
     }
-
-    // Cleanup: Reset title when component unmounts
-    return () => {
-      const titleEl = document.getElementById('topbar-title');
-      const subtitleEl = document.getElementById('topbar-subtitle');
-      // Only reset if we are navigating away from detail mode
-      if (isDetailMode && titleEl) {
-        titleEl.innerText = 'BURNIVA';
-        if (subtitleEl) subtitleEl.innerText = '';
-      }
-    };
   }, [result?.createdAt, isDetailMode]);
 
   const getFactorLevel = (val) => {
@@ -81,6 +92,8 @@ function Result() {
     if (val <= 8) return 'Cukup';
     return 'Berlebih';
   };
+
+
 
   const dominantFactors = [
     { label: "Stres", level: getFactorLevel(result?.stress) },
@@ -98,7 +111,10 @@ function Result() {
       <div className="w-full max-w-5xl mx-auto flex flex-col gap-4 md:gap-6">
 
         {/* Kartu Utama */}
-        <ResultCard burnoutLevel={result?.Prediction?.burnout_prediction || result?.burnout_level} />
+        <ResultCard 
+          burnoutLevel={result?.burnout_level} 
+          burnoutScore={result?.burnout_score}
+        />
 
         {/* Grid Skor Detail */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
@@ -111,21 +127,25 @@ function Result() {
             </div>
             <div className="flex flex-col gap-3 flex-1">
               <div className="bg-slate-50 rounded-[10px] border-[0.67px] border-gray-200 p-3 flex items-center justify-between">
-                <span className="text-sm text-gray-500">Prediksi Burnout</span>
-                <div className="px-3 py-1 bg-orange-50 border-[0.67px] border-orange-300 rounded-lg">
-                  <span className="text-xs font-bold text-orange-600">{result?.Prediction?.burnout_prediction || result?.burnout_level || 'Belum ada'}</span>
+                <span className="text-sm text-gray-500">Kategori AI</span>
+                <div className={`px-3 py-1 border-[0.67px] rounded-lg ${getBurnoutColor(result?.burnout_level).bg} ${getBurnoutColor(result?.burnout_level).border}`}>
+                  <span className={`text-xs font-bold ${getBurnoutColor(result?.burnout_level).text}`}>
+                    {formatBurnout(result?.burnout_level)}
+                  </span>
                 </div>
               </div>
 
               <div className="bg-slate-50 rounded-[10px] border-[0.67px] border-gray-200 p-3 flex items-center justify-between">
-                <span className="text-sm text-gray-500">Kondisi Mental (AI)</span>
-                <div className="px-3 py-1 bg-indigo-50 border-[0.67px] border-indigo-200 rounded-lg">
-                  <span className="text-xs font-bold text-indigo-600">{result?.Prediction?.mental_health_prediction || 'N/A'}</span>
+                <span className="text-sm text-gray-500">Kondisi Mental AI</span>
+                <div className={`px-3 py-1 border-[0.67px] rounded-lg ${getMentalColor(result?.Prediction?.mental_health_prediction).bg} ${getMentalColor(result?.Prediction?.mental_health_prediction).border}`}>
+                  <span className={`text-xs font-bold ${getMentalColor(result?.Prediction?.mental_health_prediction).text}`}>
+                    {formatMental(result?.Prediction?.mental_health_prediction)}
+                  </span>
                 </div>
               </div>
 
               <div className="bg-slate-50 rounded-[10px] border-[0.67px] border-gray-200 p-3 text-xs text-gray-600 mt-auto leading-relaxed">
-                <span className="font-semibold text-gray-800">Insight AI:</span> Berdasarkan hasil analisis, tingkat risiko burnout Anda berada di kategori <b>{result?.Prediction?.burnout_prediction || result?.burnout_level}</b> dengan indikasi kesehatan mental <b>{result?.Prediction?.mental_health_prediction || 'N/A'}</b>.
+                <span className="font-semibold text-gray-800">Insight AI:</span> Berdasarkan hasil analisis, tingkat risiko burnout Anda berada di kategori <b>{formatBurnout(result?.burnout_level)}</b> dengan indikasi kesehatan mental <b>{formatMental(result?.Prediction?.mental_health_prediction)}</b>.
               </div>
             </div>
           </div>
@@ -220,16 +240,27 @@ function Result() {
                 Lihat Riwayat <ArrowRight size={16} />
               </button>
               <button
-                onClick={() => navigate(ROUTES.INPUT)}
+                onClick={handleResetInput}
                 className="h-10 md:h-11 px-4 md:px-6 bg-primary-500 rounded-lg md:rounded-[10px] text-white text-sm md:text-base font-medium hover:bg-primary-600 transition-colors flex items-center justify-center gap-2"
               >
-                <RotateCcw size={16} /> Input Lagi
+                <RotateCcw size={16} /> Reset & Input Ulang
               </button>
             </>
           )}
         </div>
 
       </div>
+
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        onConfirm={confirmModal.onConfirm}
+        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+        confirmText="Ya, Reset"
+        cancelText="Batal"
+        variant="warning"
+      />
     </div>
   );
 }

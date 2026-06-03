@@ -5,7 +5,7 @@ import { classNames, getInitials } from '../../../utils/helpers'
 import useAuthStore from '../../../store/auth/useAuthStore'
 import Avatar from '../../../components/ui/Avatar'
 
-function AdminTopbar({ onToggleSidebar, title, subtitle }) {
+function AdminTopbar({ onToggleSidebar, title, subtitle, show = true }) {
     const navigate = useNavigate()
     const [profileOpen, setProfileOpen] = useState(false)
     const [showLogout, setShowLogout] = useState(false)
@@ -32,7 +32,12 @@ function AdminTopbar({ onToggleSidebar, title, subtitle }) {
 
     return (
         <>
-            <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-4 md:px-6 sticky top-0 z-40">
+            <header className={classNames(
+                "bg-white flex items-center justify-between px-4 md:px-6 z-40 transition-all duration-300 ease-in-out shrink-0",
+                show 
+                  ? "h-16 opacity-100 border-b border-slate-100 pointer-events-auto" 
+                  : "h-0 opacity-0 border-transparent pointer-events-none lg:h-16 lg:opacity-100 lg:border-b lg:border-slate-100 lg:pointer-events-auto"
+            )}>
 
                 {/* Kiri: Menu Mobile & Titles */}
                 <div className="flex items-center gap-4">

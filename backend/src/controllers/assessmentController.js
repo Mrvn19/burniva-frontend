@@ -133,7 +133,7 @@ const createAssessment =
         else moodToday = 'Kritis';
       }
 
-      const dailyInsightText = `Hari ini kondisimu berada di level ${burnoutLevel} dengan skor ${totalScore}%. Berdasarkan analisis, kamu perlu memperhatikan ${
+      const dailyInsightText = `Hari ini kondisimu berada di level ${burnoutLevel} dengan Indeks Risiko ${totalScore}/100. Berdasarkan analisis, kamu perlu memperhatikan ${
         stress > 6 ? 'tingkat stres' : sleep_hours < 6 ? 'jam tidur' : 'beban aktivitas'
       }mu.`;
 
@@ -193,6 +193,57 @@ const createAssessment =
     }
   }
 
+// RESET DAILY INPUT BY USER (Allow user to submit again today)
+const resetTodayAssessment = async (req, res) => {
+  try {
+    const { Op } = require("sequelize");
+    const { DailyInput, Prediction, Todo } = require("../models");
+    const userId = req.user.id;
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Cari DailyInput hari ini milik user
+    const dailyInput = await DailyInput.findOne({
+      where: {
+        user_id: userId,
+        createdAt: {
+          [Op.between]: [startOfDay, endOfDay]
+        }
+      }
+    });
+
+    if (!dailyInput) {
+      return res.status(404).json({ message: "Anda belum melakukan assessment hari ini" });
+    }
+
+    // Hapus Prediction yang berelasi
+    await Prediction.destroy({ where: { daily_input_id: dailyInput.id } });
+    
+    // Hapus Todo AI yang di-generate hari ini (karena AI akan generate ulang)
+    await Todo.destroy({
+      where: {
+        user_id: userId,
+        generated_by_ai: true,
+        createdAt: {
+          [Op.between]: [startOfDay, endOfDay]
+        }
+      }
+    });
+
+    // Hapus DailyInput
+    await dailyInput.destroy();
+
+    res.status(200).json({ message: "Data assessment hari ini berhasil direset. Silakan input kembali." });
+  } catch (error) {
+    console.error("Error resetting daily input:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 module.exports = {
   createAssessment,
+  resetTodayAssessment,
 }

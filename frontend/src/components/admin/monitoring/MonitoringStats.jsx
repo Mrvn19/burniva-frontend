@@ -8,7 +8,8 @@ const StatCard = ({ icon: Icon, value, label, iconColor, iconBg }) => (
         </div>
         <div>
             <h3 className="text-3xl font-bold text-slate-800 tracking-tight mb-0.5">{value}</h3>
-            <p className="text-sm font-medium text-slate-400">{label}</p>
+            <p className="text-sm font-bold text-slate-600">{label}</p>
+            <p className="text-[10px] font-semibold text-slate-400 mt-1 uppercase tracking-wide">Berdasarkan Assessment</p>
         </div>
     </div>
 )
@@ -27,8 +28,8 @@ function MonitoringStats({ tinggiCount = 0, sedangCount = 0, rendahCount = 0 }) 
                 icon={AlertCircle} 
                 value={sedangCount} 
                 label="Total Sedang" 
-                iconColor="text-amber-500" 
-                iconBg="bg-amber-50" 
+                iconColor="text-orange-500" 
+                iconBg="bg-orange-50" 
             />
             <StatCard 
                 icon={ShieldCheck} 

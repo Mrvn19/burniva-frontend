@@ -106,6 +106,7 @@ function Dashboard() {
       
       {/* Burnout Hero Card */}
       <BurnoutCard 
+        burnoutScore={dashboard?.latest?.burnout_score}
         burnoutPrediction={dashboard?.latestPrediction?.burnout_prediction} 
         mentalHealthPrediction={dashboard?.latestPrediction?.mental_health_prediction} 
         insight={getDynamicInsight(

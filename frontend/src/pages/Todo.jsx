@@ -44,9 +44,9 @@ const QUICK_SUGGESTIONS = [
 ]
 
 const priorityConfig = {
-  Tinggi: { color: 'text-red-500', bg: 'bg-red-50', border: 'border-red-200' },
-  Sedang: { color: 'text-yellow-600', bg: 'bg-yellow-50', border: 'border-yellow-200' },
-  Rendah: { color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' },
+  Tinggi: { color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200' },
+  Sedang: { color: 'text-orange-700', bg: 'bg-orange-50', border: 'border-orange-200' },
+  Rendah: { color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200' },
 }
 
 const INITIAL_TODOS = [
@@ -340,10 +340,9 @@ function Todo() {
       const formatted = data.map(t => {
         let categoryName = 'Personal';
         if (t.generated_by_ai) {
-          categoryName = t.source === 'gemini' ? 'AI (Gemini)' : 
-                         t.source === 'fallback' ? 'AI (Fallback)' : 'AI Suggestion';
+          categoryName = t.source === 'fallback' ? 'AI (Fallback)' : 'AI Suggestion';
         }
-        
+
         return {
           id: t.id,
           title: t.title,
@@ -441,8 +440,8 @@ function Todo() {
         </div>
 
         <h2 className="text-lg font-bold text-[#0a0a0a] mb-1">To-Do Hari Ini</h2>
-        <p className="text-xs text-[#6A7282] mb-4">
-          Daftar tindakan yang dipersonalisasi berdasarkan kondisi mental kamu. Selesaikan satu per satu untuk membantu menurunkan risiko burnout.
+        <p className="text-xs text-[#6A7282] mb-4 leading-relaxed">
+          Tugas dengan label AI akan diperbarui (reset) otomatis setiap kali kamu mengisi Cek Harian yang baru. Sedangkan tugas personal yang kamu tambahkan sendiri tidak akan terhapus.
         </p>
 
         <ProgressBar value={done} max={total} color="primary" size="md" />
