@@ -1,3 +1,10 @@
+import naufalImg from '../assets/team/naufal.svg';
+import alfaImg from '../assets/team/alfa.jpg';
+import rieftianImg from '../assets/team/rieftian.jpg';
+import rezhaImg from '../assets/team/rezha.jpg';
+import hafizhImg from '../assets/team/hafizh.jpg';
+import khalisahImg from '../assets/team/khalisah.jpg';
+
 export const teamData = [
   {
     id: 'naufal',
@@ -7,7 +14,7 @@ export const teamData = [
     isActive: true,
     description: 'Bertanggung jawab dalam pengembangan sistem Burniva secara menyeluruh, mulai dari frontend, backend, desain antarmuka pengguna, integrasi sistem, serta koordinasi pengembangan tim.',
     skills: ['Frontend', 'Backend', 'UI/UX', 'React', 'Tailwind', 'Leadership', 'System Design'],
-    image: '/src/assets/team/naufal.svg'
+    image: naufalImg
   },
   {
     id: 'alfa',
@@ -17,7 +24,7 @@ export const teamData = [
     isActive: true,
     description: 'Berperan dalam pengembangan sistem frontend dan backend Burniva, implementasi fitur, serta integrasi model sistem.',
     skills: ['Frontend', 'Backend', 'API', 'Database'],
-    image: '/src/assets/team/alfa.jpg'
+    image: alfaImg
   },
   {
     id: 'rieftian',
@@ -27,7 +34,7 @@ export const teamData = [
     isActive: true,
     description: 'Bertanggung jawab dalam analisis data, eksplorasi dataset burnout mahasiswa, dan pengembangan pendekatan berbasis data.',
     skills: ['Machine Learning', 'Python', 'Analytics', 'Data Science'],
-    image: '/src/assets/team/rieftian.jpg'
+    image: rieftianImg
   },
   {
     id: 'rezha',
@@ -37,7 +44,7 @@ export const teamData = [
     isActive: true,
     description: 'Berfokus pada validasi data, evaluasi model analitik, dan pengembangan insight berbasis data monitoring.',
     skills: ['Data Analysis', 'Statistics', 'Machine Learning', 'Research'],
-    image: '/src/assets/team/rezha.jpg'
+    image: rezhaImg
   },
   {
     id: 'hafizh',
@@ -47,7 +54,7 @@ export const teamData = [
     isActive: true,
     description: 'Berperan dalam pengembangan model AI untuk mendeteksi tingkat risiko burnout mahasiswa berdasarkan data harian.',
     skills: ['Artificial Intelligence', 'Prediction Model', 'Python', 'AI System'],
-    image: '/src/assets/team/hafizh.jpg'
+    image: hafizhImg
   },
   {
     id: 'khalisah',
@@ -57,6 +64,6 @@ export const teamData = [
     isActive: true,
     description: 'Berfokus pada pengembangan, evaluasi, dan optimasi model AI agar menghasilkan prediksi burnout yang lebih akurat.',
     skills: ['AI Model', 'Machine Learning', 'Testing', 'Data Validation'],
-    image: '/src/assets/team/khalisah.jpg'
+    image: khalisahImg
   }
 ]
