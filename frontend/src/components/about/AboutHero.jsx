@@ -8,8 +8,8 @@ function AboutHero() {
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
 
           {/* Kiri: Teks */}
-          <div className="w-full lg:w-1/2">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-[#006D5B]/20 text-[#006D5B] text-sm font-semibold mb-6 shadow-sm">
+          <div className="w-full lg:w-1/2 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-[#006D5B]/20 text-[#006D5B] text-sm font-semibold mb-6 shadow-sm mx-auto lg:mx-0">
               <ShieldCheck size={16} />
               TENTANG BURNIVA
             </div>
@@ -18,7 +18,7 @@ function AboutHero() {
               Membantu Mahasiswa Mengenali Risiko <span className="text-[#006D5B]">Burnout</span> Sejak Dini
             </h1>
 
-            <p className="text-base md:text-lg text-slate-500 leading-relaxed max-w-xl">
+            <p className="text-base md:text-lg text-slate-500 leading-relaxed max-w-xl mx-auto lg:mx-0">
               Mengenal lebih dekat platform kesehatan mental berbasis AI yang membantu mahasiswa memantau kondisi diri dan mendeteksi risiko burnout sejak dini.
             </p>
           </div>

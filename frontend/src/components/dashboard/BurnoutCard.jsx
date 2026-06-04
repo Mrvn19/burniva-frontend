@@ -10,7 +10,8 @@ function BurnoutCard({
   mentalHealthPrediction,
   insight = 'Silakan lakukan check-in harian untuk mendapatkan analisis kondisi mentalmu hari ini dan rekomendasi terbaik dari Burniva.', 
   userName = '',
-  hasTodayData = false
+  hasTodayData = false,
+  latestId
 }) {
   const navigate = useNavigate()
   const today = getTodayString()
@@ -91,7 +92,7 @@ function BurnoutCard({
 
               {/* Tombol Hasil */}
               <button
-                onClick={() => navigate(ROUTES.RESULT)}
+                onClick={() => navigate(`${ROUTES.HISTORY}/${latestId}`)}
                 className="group w-full sm:w-auto bg-white text-primary-600 hover:bg-primary-50 text-sm font-bold px-6 py-4 rounded-2xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 border border-primary-100"
               >
                 Lihat Analisis 

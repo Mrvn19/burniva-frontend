@@ -77,7 +77,7 @@ function Footer() {
           </div>
 
           <div className="col-span-1 lg:col-span-2">
-            <h4 className="text-sm font-semibold text-white mb-6 tracking-wide">Capstone</h4>
+            <h4 className="text-sm font-semibold text-white mb-6 tracking-wide">Project Team</h4>
             <div className="flex flex-col gap-4">
               {[
                 { label: 'Tentang Kami', href: ROUTES.ABOUT },
@@ -119,7 +119,7 @@ function Footer() {
                 { label: 'Beranda', href: '#beranda' },
                 { label: 'Fitur', href: '#fitur' },
                 { label: 'Cara Kerja', href: '#cara-kerja' },
-                { label: 'Demo User', href: '#demo' },
+                { label: 'Demo', href: '#demo' },
                 { label: 'FAQ', href: '#faq' }
               ].map((item) => (
                 <a key={item.label} href={item.href} className="text-sm text-slate-400 hover:text-primary-400 hover:translate-x-1 transition-all inline-block w-fit">

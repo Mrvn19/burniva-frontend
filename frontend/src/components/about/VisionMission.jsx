@@ -13,7 +13,7 @@ function VisionMission() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16">
           
           {/* Kiri: Visi */}
-          <div className="bg-[#006D5B] text-white rounded-2xl p-10 md:p-14 shadow-md flex flex-col justify-center">
+          <div className="bg-[#006D5B] text-white rounded-2xl p-10 md:p-14 shadow-md flex flex-col justify-center text-center md:text-left">
             <h2 className="text-3xl font-bold mb-6">
               Visi
             </h2>
@@ -24,7 +24,7 @@ function VisionMission() {
 
           {/* Kanan: Misi */}
           <div className="flex flex-col justify-center">
-            <h2 className="text-2xl font-bold text-[#0F172A] mb-6">
+            <h2 className="text-2xl font-bold text-[#0F172A] mb-6 text-center md:text-left">
               Misi
             </h2>
             <div className="space-y-4">

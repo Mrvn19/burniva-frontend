@@ -115,6 +115,7 @@ function Dashboard() {
         )}
         userName={user?.name}
         hasTodayData={hasTodayData}
+        latestId={dashboard?.latest?.id}
       />
 
       {/* REVISI: 4 Summary Cards (2 Kolom di HP, 4 Kolom di PC) */}

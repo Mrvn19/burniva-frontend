@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowRight, CheckCircle2, ShieldCheck, Activity, CalendarCheck, Calendar, Clock, Sparkles, BrainCircuit } from 'lucide-react'
+import { ArrowRight, CheckCircle2, ShieldCheck, Activity, CalendarCheck, Calendar, Clock, Sparkles, BrainCircuit, RotateCcw } from 'lucide-react'
 import { ROUTES } from '../utils/constants'
 import StepIndicator from '../components/form/StepIndicator'
 import MentalStep from '../components/form/MentalStep'
@@ -8,7 +8,8 @@ import AcademicStep from '../components/form/AcademicStep'
 import LifestyleStep from '../components/form/LifestyleStep'
 import ReviewStep from '../components/form/ReviewStep'
 import LoadingScreen from '../components/common/LoadingScreen'
-import { createAssessment } from '../services/assessmentService'
+import { createAssessment, resetAssessmentToday } from '../services/assessmentService'
+import ConfirmationModal from '../components/common/ConfirmationModal'
 import { getDashboard } from '../services/dashboardService'
 import { motion } from 'framer-motion'
 import useAuthStore from '../store/auth/useAuthStore'
@@ -24,6 +25,8 @@ function Input() {
   const [isLocked, setIsLocked] = useState(false)
   const [isProfileIncomplete, setIsProfileIncomplete] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [latestId, setLatestId] = useState(null)
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null })
 
   const [formData, setFormData] = useState({
     stress: 5,
@@ -53,6 +56,7 @@ function Input() {
         if (data?.latest?.createdAt) {
           if (isToday(data.latest.createdAt)) {
             setIsLocked(true);
+            setLatestId(data.latest.id);
             return;
           }
         }
@@ -65,6 +69,26 @@ function Input() {
     };
     checkDailyInput();
   }, []);
+
+  const handleResetInput = () => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Reset & Input Ulang',
+      message: 'Data assessment dan rekomendasi Todo Anda hari ini akan dihapus. Anda harus mengisi ulang dari awal. Apakah Anda yakin?',
+      onConfirm: async () => {
+        try {
+          await resetAssessmentToday();
+          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+          setIsLocked(false);
+          setLatestId(null);
+          setStep(1);
+        } catch (error) {
+          console.error("Gagal melakukan reset:", error);
+          alert(error.response?.data?.message || "Terjadi kesalahan saat reset data");
+        }
+      }
+    });
+  };
 
   const handleNext = () => {
     if (step < 4) setStep(step + 1)
@@ -101,7 +125,7 @@ function Input() {
   // 1. STATE: LOADING (Mengecek Status)
   if (isChecking) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-[#F8FAFC] p-4">
+      <div className="h-full min-h-[80vh] w-full flex items-center justify-center bg-[#F8FAFC] p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -126,7 +150,7 @@ function Input() {
   // 2. STATE: LOCKED (Sudah Isi Hari Ini)
   if (isLocked) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-[#F8FAFC] p-4">
+      <div className="h-full min-h-[80vh] w-full flex items-center justify-center bg-[#F8FAFC] p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -134,7 +158,7 @@ function Input() {
           className="bg-white rounded-3xl overflow-hidden max-w-lg w-full shadow-[0px_20px_40px_-10px_rgba(0,0,0,0.08)] border border-slate-100"
         >
           {/* Header Graphic */}
-          <div className="bg-primary-500 p-8 flex flex-col items-center justify-center relative overflow-hidden">
+          <div className="bg-primary-500 p-6 flex flex-col items-center justify-center relative overflow-hidden">
             <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10" />
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary-700/20 rounded-full blur-xl -ml-10 -mb-10" />
 
@@ -142,21 +166,21 @@ function Input() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="w-20 h-20 bg-white rounded-2xl shadow-lg flex items-center justify-center relative z-10 mb-4"
+              className="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center relative z-10 mb-3"
             >
-              <CheckCircle2 className="w-10 h-10 text-primary-500" />
+              <CheckCircle2 className="w-8 h-8 text-primary-500" />
             </motion.div>
-            <h2 className="text-2xl font-bold text-white relative z-10 text-center">Cek Harian Hari Ini Sudah Selesai</h2>
+            <h2 className="text-xl font-bold text-white relative z-10 text-center">Cek Harian Hari Ini Sudah Selesai</h2>
           </div>
 
           {/* Content */}
-          <div className="p-8">
-            <p className="text-slate-600 text-center text-sm leading-relaxed mb-6">
-              Terima kasih sudah meluangkan waktu untuk mengecek kondisi mentalmu hari ini. Burniva telah merekam assessment harianmu dan sedang membantu menganalisis kondisi burnout berdasarkan jawaban yang diberikan. Kamu bisa melakukan check-in kembali besok untuk menjaga konsistensi pemantauan kesehatan mental.
+          <div className="p-6">
+            <p className="text-slate-600 text-center text-[13.5px] leading-relaxed mb-5">
+              Terima kasih telah melakukan check-in hari ini. Hasil assessmentmu telah tersimpan dan siap dianalisis. Kembali lagi besok untuk memantau perkembangan kondisi mentalmu secara berkala.
             </p>
 
             {/* Info Card */}
-            <div className="bg-slate-50 rounded-2xl p-4 mb-8 border border-slate-100 flex items-center justify-between">
+            <div className="bg-slate-50 rounded-2xl p-3 mb-6 border border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center border border-slate-100">
                   <Calendar className="w-5 h-5 text-primary-500" />
@@ -173,28 +197,40 @@ function Input() {
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2.5">
               <button
-                onClick={() => navigate(ROUTES.RESULT)}
-                className="w-full h-12 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                onClick={() => navigate(`${ROUTES.HISTORY}/${latestId}`)}
+                className="w-full h-[42px] bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm"
               >
-                <Activity size={18} />
+                <Activity size={16} />
                 Lihat Analisis Hari Ini
               </button>
               <button
+                onClick={handleResetInput}
+                className="w-full h-[42px] bg-white hover:bg-red-50 text-red-600 font-semibold rounded-xl border border-red-200 transition-all flex items-center justify-center gap-2 text-sm"
+              >
+                <RotateCcw size={16} />
+                Reset & Input Ulang
+              </button>
+              <button
                 onClick={() => navigate(ROUTES.DASHBOARD)}
-                className="w-full h-12 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-xl border border-slate-200 transition-all flex items-center justify-center"
+                className="w-full h-[42px] bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-xl border border-slate-200 transition-all flex items-center justify-center text-sm"
               >
                 Kembali ke Dashboard
               </button>
-              <button
-                onClick={() => navigate(ROUTES.HISTORY)}
-                className="w-full mt-1 text-sm text-slate-400 hover:text-primary-500 font-medium transition-colors"
-              >
-                Riwayat Assessment
-              </button>
             </div>
           </div>
+          
+          <ConfirmationModal
+            isOpen={confirmModal.isOpen}
+            title={confirmModal.title}
+            message={confirmModal.message}
+            onConfirm={confirmModal.onConfirm}
+            onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+            confirmText="Ya, Reset"
+            cancelText="Batal"
+            variant="warning"
+          />
         </motion.div>
       </div>
     )
@@ -203,7 +239,7 @@ function Input() {
   // 2.5 STATE: PROFIL BELUM LENGKAP
   if (isProfileIncomplete) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-[#F8FAFC] p-4">
+      <div className="h-full min-h-[80vh] w-full flex items-center justify-center bg-[#F8FAFC] p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}

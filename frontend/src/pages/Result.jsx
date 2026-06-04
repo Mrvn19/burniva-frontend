@@ -5,9 +5,7 @@ import { ROUTES } from '../utils/constants';
 import ResultCard from '../components/result/ResultCard';
 import FactorBreakdown from '../components/result/FactorBreakdown';
 import LoadingScreen from '../components/common/LoadingScreen';
-import ConfirmationModal from '../components/common/ConfirmationModal';
 import { getHistoryDetail } from '../services/historyService';
-import { resetAssessmentToday } from '../services/assessmentService';
 import { getBurnoutColor, getMentalColor, formatBurnout, formatMental } from '../utils/format';
 
 function Result() {
@@ -18,25 +16,6 @@ function Result() {
   const [result, setResult] = useState({});
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
-
-  const handleResetInput = () => {
-    setConfirmModal({
-      isOpen: true,
-      title: 'Reset & Input Ulang',
-      message: 'Data assessment dan rekomendasi Todo Anda hari ini akan dihapus. Anda harus mengisi ulang dari awal. Apakah Anda yakin?',
-      onConfirm: async () => {
-        try {
-          await resetAssessmentToday();
-          setConfirmModal(prev => ({ ...prev, isOpen: false }));
-          navigate(ROUTES.INPUT);
-        } catch (error) {
-          console.error("Gagal melakukan reset:", error);
-          alert(error.response?.data?.message || "Terjadi kesalahan saat reset data");
-        }
-      }
-    });
-  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -47,6 +26,14 @@ function Result() {
           const localData = JSON.parse(localStorage.getItem("analysisResult"));
           if (localData && localData.id) {
             fetchId = localData.id;
+          } else {
+            // Fallback: Jika tidak ada di localStorage (mungkin refresh atau login beda device),
+            // ambil id assessment terbaru dari dashboard
+            const { getDashboard } = await import('../services/dashboardService');
+            const dashboardData = await getDashboard();
+            if (dashboardData?.latest?.id) {
+              fetchId = dashboardData.latest.id;
+            }
           }
         }
 
@@ -234,33 +221,22 @@ function Result() {
           ) : (
             <>
               <button
-                onClick={() => navigate(ROUTES.HISTORY)}
+                onClick={() => navigate(ROUTES.DASHBOARD)}
                 className="h-10 md:h-11 px-4 md:px-6 rounded-lg md:rounded-[10px] outline outline-[0.67px] outline-offset-[-0.67px] outline-gray-200 text-neutral-950 text-sm md:text-base font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
               >
-                Lihat Riwayat <ArrowRight size={16} />
+                <ArrowLeft size={16} /> Kembali ke Dashboard
               </button>
               <button
-                onClick={handleResetInput}
-                className="h-10 md:h-11 px-4 md:px-6 bg-primary-500 rounded-lg md:rounded-[10px] text-white text-sm md:text-base font-medium hover:bg-primary-600 transition-colors flex items-center justify-center gap-2"
+                onClick={() => navigate(ROUTES.HISTORY)}
+                className="h-10 md:h-11 px-4 md:px-6 bg-primary-500 text-white rounded-lg md:rounded-[10px] text-sm md:text-base font-medium hover:bg-primary-600 transition-colors flex items-center justify-center gap-2"
               >
-                <RotateCcw size={16} /> Reset & Input Ulang
+                Lihat Riwayat <ArrowRight size={16} />
               </button>
             </>
           )}
         </div>
 
       </div>
-
-      <ConfirmationModal
-        isOpen={confirmModal.isOpen}
-        title={confirmModal.title}
-        message={confirmModal.message}
-        onConfirm={confirmModal.onConfirm}
-        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
-        confirmText="Ya, Reset"
-        cancelText="Batal"
-        variant="warning"
-      />
     </div>
   );
 }

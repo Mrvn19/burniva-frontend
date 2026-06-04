@@ -17,12 +17,12 @@ function BurnivaStory() {
           </div>
 
           {/* Kanan: Teks Cerita */}
-          <div>
+          <div className="text-center lg:text-left">
             <h2 className="text-3xl md:text-4xl font-bold text-[#0F172A] mb-8">
               Cerita di Balik Burniva
             </h2>
 
-            <div className="space-y-6 text-[15px] md:text-base text-slate-500 leading-relaxed">
+            <div className="space-y-6 text-[15px] md:text-base text-slate-500 leading-relaxed text-center lg:text-left">
               <p>
                 Tuntutan akademik yang tinggi, tenggat waktu tugas yang terus berdatangan, dan tekanan untuk selalu berprestasi seringkali membuat mahasiswa mengabaikan kesehatan mental mereka. Banyak yang terjebak dalam siklus kelelahan tanpa ujung.
               </p>
